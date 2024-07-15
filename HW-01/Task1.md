@@ -12,7 +12,7 @@ commit;
 ```
 ### 2. Просмотр уровня изоляции
 ```sql
-show transaction isolation level
+show transaction isolation level;
 ```
 Результат команды
 ```
@@ -22,3 +22,20 @@ show transaction isolation level
 (1 row)
 ```
 
+### 3. Запуск транзакции с уровнем изоляции transaction_isolation
+Команда в первой сессии:
+```sql
+insert into persons(first_name, second_name) values('sergey', 'sergeev');
+```
+Команда во второй сессии:
+```sql
+select * from persons;
+```
+Результат команды во второй сессии:
+```
+ id | first_name | second_name 
+----+------------+-------------
+  1 | ivan       | ivanov
+  2 | petr       | petrov
+```
+Результат выполнения команды в сессии не виден во второй сессии.
