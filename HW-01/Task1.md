@@ -58,3 +58,4 @@ select * from persons;
   3 | sergey     | sergeev
 (3 rows)
 ```
+Теперь новая запись видна. При уровне изоляции transaction_isolation
