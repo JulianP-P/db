@@ -10,3 +10,15 @@ insert into persons(first_name, second_name) values('ivan', 'ivanov');
 insert into persons(first_name, second_name) values('petr', 'petrov');
 commit;
 ```
+### 2. Просмотр уровня изоляции
+```sql
+show transaction isolation level
+```
+Результат команды
+```
+ transaction_isolation 
+-----------------------
+ read committed
+(1 row)
+```
+
