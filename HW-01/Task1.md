@@ -3,14 +3,14 @@
 
 Домашняя работа выполнялась в docker-контейнере, версия postgre 16.3.
 
-### 1. Создание бд
+## 1. Создание бд
 ```sql
 create table persons(id serial, first_name text, second_name text);
 insert into persons(first_name, second_name) values('ivan', 'ivanov');
 insert into persons(first_name, second_name) values('petr', 'petrov');
 commit;
 ```
-### 2. Просмотр уровня изоляции
+## 2. Просмотр уровня изоляции
 ```sql
 show transaction isolation level;
 ```
@@ -22,7 +22,7 @@ show transaction isolation level;
 (1 row)
 ```
 
-### 3. Запуск транзакции с уровнем изоляции transaction_isolation
+## 3. Запуск транзакции с уровнем изоляции transaction_isolation
 Команда в первой сессии:
 ```sql
 insert into persons(first_name, second_name) values('sergey', 'sergeev');
