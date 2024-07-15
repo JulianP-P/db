@@ -14,7 +14,7 @@ commit;
 ```sql
 show transaction isolation level;
 ```
-Результат команды
+Результат команды:
 ```
  transaction_isolation 
 -----------------------
@@ -37,5 +37,23 @@ select * from persons;
 ----+------------+-------------
   1 | ivan       | ivanov
   2 | petr       | petrov
+(2 rows)
 ```
-Результат выполнения команды в сессии не виден во второй сессии.
+Результат выполнения команды в сессии не виден во второй сессии, т.к. при уровне изоляции transaction_isolation не видны не зафиксированные транзакции.
+Завершаю транзакцию в первой сессии:
+```sql
+commit;
+```
+Команда во второй сессии:
+```sql
+select * from persons;
+```
+Результат работы команды:
+```
+ id | first_name | second_name 
+----+------------+-------------
+  1 | ivan       | ivanov
+  2 | petr       | petrov
+  3 | sergey     | sergeev
+(3 rows)
+```
