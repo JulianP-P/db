@@ -70,7 +70,8 @@ insert into persons(first_name, second_name) values('sveta', 'svetova');
 ```
 Команда во второй сессии:
 ```sql
-set transaction isolation level repeatable read; select * from persons;
+set transaction isolation level repeatable read;
+select * from persons;
 ```
 Результат команды во второй сессии:
 ```
