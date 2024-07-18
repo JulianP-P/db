@@ -21,6 +21,12 @@ select * from pg_database
 \l
 \l+
 ```
+
+Подключение к бд через psql
+```sql
+\c db_name
+```
+
 ## CREATE
 ```sql
 CREATE DATABASE имя
