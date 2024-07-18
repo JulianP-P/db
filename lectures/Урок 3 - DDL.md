@@ -49,6 +49,16 @@ CREATE DATABASE имя
 - template1 - Шаблон по умолчанию. Но лучше его тоже не менять. Лучше создать свой шаблон и указывать его явно при создании бд.
 - postgres - нужна для первого подключения к бд
 
+## Изменение атрибутов базы данных
+```sql
+ALTER DATABASE имя RENAME TO новое_имя
+ALTER DATABASE имя OWNER TO { новый_владелец | CURRENT_USER | SESSION_USER }
+ALTER DATABASE имя SET TABLESPACE новое_табл_пространство
+ALTER DATABASE имя SET параметр_конфигурации { TO | = } { значение | DEFAULT }
+ALTER DATABASE имя SET параметр_конфигурации FROM CURRENT
+ALTER DATABASE имя RESET параметр_конфигурации
+ALTER DATABASE имя RESET ALL
+```
 Переименование бд
 ```sql
 alter database old_name rename to new_name
