@@ -116,6 +116,11 @@ CREATE DATABASE имя
 ALTER TABLE name_table SET SCHEMA name_schema
 ```
 
+Изменение табличного пространства таблицы
+```sql
+ALTER TABLE name_table SET TABLESPACE name_schema
+```
+
 ## Изменение атрибутов базы данных (ALTER)
 ```sql
 ALTER DATABASE имя RENAME TO новое_имя
