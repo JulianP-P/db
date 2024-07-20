@@ -111,6 +111,11 @@ CREATE DATABASE имя
 
 Схема, в которой будет создаваться таблица (при отсутсвтии явного указания) указывается в парметре search_path
 
+Изменение схемы таблицы
+```sql
+ALTER TABLE name_table SET SCHEMA name_schema
+```
+
 ## Изменение атрибутов базы данных (ALTER)
 ```sql
 ALTER DATABASE имя RENAME TO новое_имя
