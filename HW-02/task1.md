@@ -28,7 +28,7 @@ sudo docker run --name pg-server --network pg-net -e POSTGRES_PASSWORD=postgres 
 ```bash
 sudo docker run -it --rm --network pg-net --name pg-client postgres:15 psql -h pg-server -U postgres
 ```
-5. Создание и заполнение бд
+5. Создание и заполнение бд внутри контейнера pg-client
 ```sql
 CREATE DATABASE otus; 
 \c otus
@@ -46,6 +46,8 @@ select * from persons;
   2 | petr       | petrov
 (2 rows)
 ```
+6. Подключение к бд с ноутбука
+
 -- 4. Проверяем, что подключились через отдельный контейнер:
 sudo docker ps -a
 
