@@ -24,12 +24,28 @@ sudo docker network create pg-net
 ```bash
 sudo docker run --name pg-server --network pg-net -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 -v /var/lib/postgres:/var/lib/postgresql/data postgres:15
 ```
-4. 
--- 3. Запускаем отдельный контейнер с клиентом в общей сети с БД: 
+4. Создание контейнера с клиентом sql
+```bash
 sudo docker run -it --rm --network pg-net --name pg-client postgres:15 psql -h pg-server -U postgres
-
+```
+5. Создание и заполнение бд
+```sql
 CREATE DATABASE otus; 
-
+\c otus
+create table persons(id serial, first_name text, second_name text);
+insert into persons(first_name, second_name) values('ivan', 'ivanov');
+insert into persons(first_name, second_name) values('petr', 'petrov');
+commit;
+```
+Проверка данных
+```sql
+select * from persons;
+ id | first_name | second_name 
+----+------------+-------------
+  1 | ivan       | ivanov
+  2 | petr       | petrov
+(2 rows)
+```
 -- 4. Проверяем, что подключились через отдельный контейнер:
 sudo docker ps -a
 
