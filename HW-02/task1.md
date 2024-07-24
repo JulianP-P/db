@@ -1,4 +1,5 @@
 ### otus-PostgreSQL-2024-05-Прощина Юлия
+### ДЗ 2 Установка и настройка PostgteSQL в контейнере Docker
 
 1. Создание /var/lib/postgres
 ```bash
@@ -35,7 +36,7 @@ select * from persons;
 (2 rows)
 ```
 6. Подключение к бд с ноутбука
-
+![name](https://github.com/JulianP-P/db/blob/main/HW-02/2024-07-23_18%3A28%3A38.png)
 7. Удаление контейнеров
 ```bash
 sudo docker ps -a
