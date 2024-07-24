@@ -1,17 +1,5 @@
 ### otus-PostgreSQL-2024-05-Прощина Юлия
 
-поставить на нем Docker Engine
-сделать каталог /var/lib/postgres
-развернуть контейнер с PostgreSQL 15 смонтировав в него /var/lib/postgresql
-развернуть контейнер с клиентом postgres
-подключится из контейнера с клиентом к контейнеру с сервером и сделать таблицу с парой строк
-подключится к контейнеру с сервером с ноутбука/компьютера извне инстансов GCP/ЯО/места установки докера
-удалить контейнер с сервером
-создать его заново
-подключится снова из контейнера с клиентом к контейнеру с сервером
-проверить, что данные остались на месте
-оставляйте в ЛК ДЗ комментарии что и как вы делали и как боролись с проблемами
-
 1. Создание /var/lib/postgres
 ```bash
 mkdir /var/lib/postgres
@@ -58,9 +46,19 @@ CONTAINER ID   IMAGE         COMMAND                  CREATED          STATUS   
 sudo docker stop 9440a1a232ae
 sudo docker rm 9440a1a232ae
 ```
--- 4. Проверяем, что подключились через отдельный контейнер:
-sudo docker ps -a
+8. Создание контейнеров заново
+```
+sudo docker run --name pg-server --network pg-net -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 -v /var/lib/postgres:/var/lib/postgresql/data postgres:15
 
-sudo docker stop 5d4d5a5dbc37
 
-sudo docker rm 5d4d5a5dbc37
+sudo docker run -it --rm --network pg-net --name pg-client postgres:15 psql -h pg-server -U postgres
+```
+9. Проверка, что данные на месте
+```sql
+select * from persons;
+ id | first_name | second_name 
+----+------------+-------------
+  1 | ivan       | ivanov
+  2 | petr       | petrov
+(2 rows)
+```
