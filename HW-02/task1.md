@@ -54,6 +54,7 @@ sudo docker ps -a
 CONTAINER ID   IMAGE         COMMAND                  CREATED          STATUS                        PORTS                                       NAMES
 0043f6de19d3   postgres:15   "docker-entrypoint.s…"   10 minutes ago   Up 10 minutes                 5432/tcp                                    pg-client
 9440a1a232ae   postgres:15   "docker-entrypoint.s…"   12 minutes ago   Up 12 minutes                 0.0.0.0:5432->5432/tcp, :::5432->5432/tcp   pg-server
+
 sudo docker stop 9440a1a232ae
 sudo docker rm 9440a1a232ae
 ```
