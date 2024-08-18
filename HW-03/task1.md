@@ -61,7 +61,7 @@ data_directory = '/mnt/data/16/main/'           # use data in another directory
 
 ```
 sudo systemctl start postgresql@16-main.service
-
+```
 
 ```sql
 postgres=# select * from test;
