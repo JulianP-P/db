@@ -60,7 +60,16 @@ data_directory = '/mnt/data/16/main/'           # use data in another directory
 ```
 
 ```
-sudo systemctl start postgresql@16-main.service 
+sudo systemctl start postgresql@16-main.service
+
+
+```sql
+postgres=# select * from test;
+ c1 
+----
+ 1
+(1 row)
+```
 ```
 ```
 sudo -u postgres pg_lsclusters
