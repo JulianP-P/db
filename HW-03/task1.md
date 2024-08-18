@@ -19,6 +19,11 @@ postgres=# select * from test;
 (1 row)
 ```
 
+```
+mount | grep sdb
+/dev/sdb1 on /mnt/data type ext4 (rw,relatime)
+```
+
 ```sql
 sudo -u postgres pg_lsclusters
 Ver Cluster Port Status Owner    Data directory              Log file
