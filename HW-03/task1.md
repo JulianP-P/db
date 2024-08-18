@@ -70,7 +70,7 @@ postgres=# select * from test;
  1
 (1 row)
 ```
-```
+
 ```
 sudo -u postgres pg_lsclusters
 Ver Cluster Port Status Owner    Data directory     Log file
