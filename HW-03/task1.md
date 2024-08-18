@@ -38,3 +38,18 @@ sudo -u postgres pg_lsclusters
 Ver Cluster Port Status Owner    Data directory              Log file
 16  main    5432 down   postgres /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
 ```
+
+```
+sudo -u postgres pg_lsclusters
+Ver Cluster Port Status Owner     Data directory              Log file
+16  main    5432 down   <unknown> /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
+
+```
+
+```
+2024-08-18 15:08:53.274 MSK [1112] LOG:  could not open file "postmaster.pid": Нет такого файла или каталога
+2024-08-18 15:08:53.276 MSK [1112] LOG:  performing immediate shutdown because data directory lock file is invalid
+2024-08-18 15:08:53.276 MSK [1112] LOG:  received immediate shutdown request
+2024-08-18 15:08:53.276 MSK [1112] LOG:  could not open file "postmaster.pid": Нет такого файла или каталога
+2024-08-18 15:08:53.283 MSK [1112] LOG:  database system is shut down
+```
