@@ -53,3 +53,17 @@ Ver Cluster Port Status Owner     Data directory              Log file
 2024-08-18 15:08:53.276 MSK [1112] LOG:  could not open file "postmaster.pid": Нет такого файла или каталога
 2024-08-18 15:08:53.283 MSK [1112] LOG:  database system is shut down
 ```
+
+```
+/etc/postgresql/16/main$ vim postgresql.conf
+data_directory = '/mnt/data/16/main/'           # use data in another directory
+```
+
+```
+sudo systemctl start postgresql@16-main.service 
+```
+```
+sudo -u postgres pg_lsclusters
+Ver Cluster Port Status Owner    Data directory     Log file
+16  main    5432 online postgres /mnt/data/16/main/ /var/log/postgresql/postgresql-16-main.log
+```
