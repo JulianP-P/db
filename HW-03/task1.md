@@ -24,6 +24,15 @@ mount | grep sdb
 /dev/sdb1 on /mnt/data type ext4 (rw,relatime)
 ```
 
+```
+projs@projs-VirtualBox:/mnt$ ls -alh
+итого 12K
+drwxr-xr-x  3 root     root     4,0K авг 18 13:51 .
+drwxr-xr-x 23 root     root     4,0K авг  4 20:02 ..
+drwxr-xr-x  3 postgres postgres 4,0K авг 18 13:34 data
+
+```
+
 ```sql
 sudo -u postgres pg_lsclusters
 Ver Cluster Port Status Owner    Data directory              Log file
