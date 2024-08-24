@@ -5,7 +5,11 @@
 добавьте свеже-созданный диск к виртуальной машине - надо зайти в режим ее редактирования и дальше выбрать пункт attach existing disk
 проинициализируйте диск согласно инструкции и подмонтировать файловую систему, только не забывайте менять имя диска на актуальное, в вашем случае это скорее всего будет /dev/sdb - https://www.digitalocean.com/community/tutorials/how-to-partition-and-format-storage-devices-in-linux
 перезагрузите инстанс и убедитесь, что диск остается примонтированным (если не так смотрим в сторону fstab)
+
+
 сделайте пользователя postgres владельцем /mnt/data - chown -R postgres:postgres /mnt/data/
+
+
 перенесите содержимое /var/lib/postgres/15 в /mnt/data - mv /var/lib/postgresql/15/mnt/data
 попытайтесь запустить кластер - sudo -u postgres pg_ctlcluster 15 main start
 напишите получилось или нет и почему
@@ -41,32 +45,30 @@ postgres=# select * from test;
  1
 (1 row)
 ```
-
+3) Остановка кластера
+```sql
+sudo -u postgres pg_lsclusters
+Ver Cluster Port Status Owner    Data directory              Log file
+16  main    5432 down   postgres /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
+```
+4) Создание диска и монитрование его
 ```
 mount | grep sdb
 /dev/sdb1 on /mnt/data type ext4 (rw,relatime)
 ```
-
+5) Смена владельца директории /mnt/data/ и перенос в нее сожержимого /var/lib/postgresql/16/mnt/data
 ```
 projs@projs-VirtualBox:/mnt$ ls -alh
 итого 12K
 drwxr-xr-x  3 root     root     4,0K авг 18 13:51 .
 drwxr-xr-x 23 root     root     4,0K авг  4 20:02 ..
 drwxr-xr-x  3 postgres postgres 4,0K авг 18 13:34 data
-
 ```
-
-```sql
-sudo -u postgres pg_lsclusters
-Ver Cluster Port Status Owner    Data directory              Log file
-16  main    5432 down   postgres /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
-```
-
+6) Перавая попытка запустить кластер
 ```
 sudo -u postgres pg_lsclusters
 Ver Cluster Port Status Owner     Data directory              Log file
 16  main    5432 down   <unknown> /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
-
 ```
 
 ```
