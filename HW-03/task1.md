@@ -1,10 +1,5 @@
-создайте виртуальную машину c Ubuntu 20.04/22.04 LTS в GCE/ЯО/Virtual Box/докере
-поставьте на нее PostgreSQL 15 через sudo apt
-проверьте что кластер запущен через sudo -u postgres pg_lsclusters
-зайдите из под пользователя postgres в psql и сделайте произвольную таблицу с произвольным содержимым
-postgres=# create table test(c1 text);
-postgres=# insert into test values('1');
-\q
+
+
 остановите postgres например через sudo -u postgres pg_ctlcluster 15 main stop
 создайте новый диск к ВМ размером 10GB
 добавьте свеже-созданный диск к виртуальной машине - надо зайти в режим ее редактирования и дальше выбрать пункт attach existing disk
@@ -20,13 +15,18 @@ postgres=# insert into test values('1');
 напишите получилось или нет и почему
 зайдите через через psql и проверьте содержимое ранее созданной таблицы
 задание со звездочкой *: не удаляя существующий инстанс ВМ сделайте новый, поставьте на его PostgreSQL, удалите файлы с данными из /var/lib/postgres, перемонтируйте внешний диск который сделали ранее от первой виртуальной машины ко второй и запустите PostgreSQL на второй машине так чтобы он работал с данными на внешнем диске, расскажите как вы это сделали и что в итоге получилось.
+### otus-PostgreSQL-2024-05-Прощина Юлия
 
+Домашняя работа выполнялась в docker-контейнере, версия postgre 16.3.
+
+
+1) Проверка, что кластер запущен
 ```sql
 sudo -u postgres pg_lsclusters
 Ver Cluster Port Status Owner    Data directory              Log file
 16  main    5432 online postgres /var/lib/postgresql/16/main /var/log/postgresql/postgresql-16-main.log
 ```
-
+2) Создание таблицы
 ```sql
 postgres=# create table test(c1 text);
 CREATE TABLE
