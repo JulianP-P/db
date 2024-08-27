@@ -4,7 +4,7 @@
 Домашняя работа выполнялась в виртуальной манише, версия postgre 16.3.
 
 1) Создание бд testdb под пользователем postgres
-```sql
+```psql
 postgres=# select datname from pg_database;
   datname  
 -----------
