@@ -69,7 +69,7 @@ LINE 1: select * from testnm.t1;
 testdb=# create user testread password 'test123' in role readonly;
 CREATE ROLE
 ```
-5) Нельзя создать таблицу ни в схеме public, ни в схеме testnm. Как я понимаю, это связано с версией postgres -  16.3. В этой версии убрана автоматическая выдача прав CREATE TABLE в схеме public.
+5) Нельзя создать таблицу ни в схеме public, ни в схеме testnm. Причина - версия postgres 16.3. В этой версии убрана автоматическая выдача прав CREATE TABLE в схеме public.
 ```
 testdb=> create table t2(c1 integer);
 ERROR:  permission denied for schema public
