@@ -49,4 +49,18 @@ testdb=# grant usage on schema testnm to readonly;
 GRANT
 testdb=# grant select on all tables in schema testnm to readonly;
 GRANT
+
+testdb=# create user testread password 'test123' role readonly;
+CREATE ROLE
+```
+На этом моменте возникла ошибка
+```
+testdb=> select * from testnm.t1;
+ERROR:  permission denied for schema testnm
+LINE 1: select * from testnm.t1;
+```
+Оказалосб, что правильно создавать роль следующим образом
+```
+testdb=# create user testread password 'test123' in role readonly;
+CREATE ROLE
 ```
