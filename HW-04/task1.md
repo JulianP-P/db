@@ -4,7 +4,7 @@
 Домашняя работа выполнялась в виртуальной манише, версия postgre 16.3.
 
 1) Создание бд testdb под пользователем postgres
-```psql
+```
 postgres=# select datname from pg_database;
   datname  
 -----------
@@ -25,7 +25,7 @@ postgres=# select datname from pg_database;
 (4 rows)
 ```
 2) Создание схемы testnm, таблицы t1 и заполнение ее
-```sql
+```
 postgres=# \c
 You are now connected to database "postgres" as user "postgres".
 postgres=# \c testdb 
