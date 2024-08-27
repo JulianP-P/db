@@ -64,3 +64,12 @@ LINE 1: select * from testnm.t1;
 testdb=# create user testread password 'test123' in role readonly;
 CREATE ROLE
 ```
+```
+testdb=> create table t2(c1 integer);
+ERROR:  permission denied for schema public
+LINE 1: create table t2(c1 integer);
+                     ^
+testdb=> create table testnm.t2(c1 integer);
+ERROR:  permission denied for schema testnm
+LINE 1: create table testnm.t2(c1 integer);
+```
