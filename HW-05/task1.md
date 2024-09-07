@@ -1,3 +1,4 @@
+## pgbench
 Изменение параметров
 | Название параметра | Новые настройки | Старые настройки |
 |--------------------|:---------------:|:----------------:|
@@ -35,7 +36,7 @@ pgbench -c20 -P 6 -T 180 -U postgres postgres
 | initial connection time = 41.338 ms | initial connection time = 38.796 ms |
 | tps = 1266.674193 (without initial connection time) | tps = 1275.339540 (without initial connection time) |
 
-
+## Настройка autovacuum
 1) Создание таблицы и заполнение ее
 ```
 postgres=# CREATE TABLE student(
