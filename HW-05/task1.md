@@ -74,3 +74,20 @@ FROM pg_stat_user_tables WHERE relname = 'student';
 (1 row)
 
 ```
+
+```
+postgres=# SELECT relname, n_live_tup, n_dead_tup,
+trunc(100*n_dead_tup/(n_live_tup+1))::float AS "ratio%", last_autovacuum
+FROM pg_stat_user_tables WHERE relname = 'student';
+ relname | n_live_tup | n_dead_tup | ratio% |        last_autovacuum        
+---------+------------+------------+--------+-------------------------------
+ student |    1000000 |          0 |      0 | 2024-09-07 18:02:13.323372+03
+(1 row)
+
+postgres=# SELECT pg_size_pretty(pg_total_relation_size('student'));
+ pg_size_pretty 
+----------------
+ 808 MB
+(1 row)
+
+```
