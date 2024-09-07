@@ -91,3 +91,29 @@ postgres=# SELECT pg_size_pretty(pg_total_relation_size('student'));
 (1 row)
 
 ```
+
+```
+postgres=# UPDATE student SET fio = 'name123456';
+^[[AUPDATE 1000000
+postgres=# UPDATE student SET fio = 'name1234567';
+UPDATE 1000000
+postgres=# UPDATE student SET fio = 'name12345678';
+UPDATE 1000000
+postgres=# UPDATE student SET fio = 'name123456789';
+UPDATE 1000000
+postgres=# UPDATE student SET fio = 'name1234567890';
+UPDATE 1000000
+postgres=# SELECT pg_size_pretty(pg_total_relation_size('student'));
+ pg_size_pretty 
+----------------
+ 808 MB
+(1 row)
+
+postgres=# SELECT relname, n_live_tup, n_dead_tup,
+trunc(100*n_dead_tup/(n_live_tup+1))::float AS "ratio%", last_autovacuum
+FROM pg_stat_user_tables WHERE relname = 'student';
+ relname | n_live_tup | n_dead_tup | ratio% |        last_autovacuum        
+---------+------------+------------+--------+-------------------------------
+ student |    1000000 |    2999826 |    299 | 2024-09-07 18:06:12.056018+03
+(1 row)
+```
