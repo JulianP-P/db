@@ -15,7 +15,7 @@
 |random_page_cost    |      4          |        4.0       |
 |effective_io_concurrency |   2        |        1         |
 |work_mem            |     6553kB      |        4MB       |
-|min_wal_size        |       4GB       |    |
+|min_wal_size        |       4GB       |        80MB      |
 |max_wal_size        |      16GB       |        1 GB      |
 
 Команда для теста
