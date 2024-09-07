@@ -1,4 +1,4 @@
-
+Изменение параметров
 | Название параметра | Новые настройки | Старые настройки | Пояснение параметра |
 |--------------------|:---------------:|:----------------:|---------------------|
 |max_connections     |      40         |        100       | макимальное колисество коннектов |
@@ -13,6 +13,11 @@
 |work_mem            |     6553kB      |        4MB       |
 |min_wal_size        |       4GB       |    |
 |max_wal_size        |      16GB       |        1 GB      |
+
+Команда для теста
+```
+pgbench -c20 -P 6 -T 180 -U postgres postgres
+```
 
 | тест с новыми настройками | тест со старыми настройками |
 |---------------------------|-----------------------------|
@@ -31,9 +36,7 @@
 | tps = 1266.674193 (without initial connection time) | tps = 1275.339540 (without initial connection time) |
 
 
-postgres@pg-vb-1:/home/pg-vb-1/Desktop$ pgbench -c20 -P 6 -T 180 -U postgres postgres
-
-
+1) Создание таблицы и заполнение ее
 ```
 postgres=# CREATE TABLE student(
  id serial,
@@ -48,6 +51,7 @@ postgres=# SELECT pg_size_pretty(pg_total_relation_size('student'));
  135 MB
 (1 row)
 ```
+2) Обновление полей таблицы. Из-за того, что в короткое время было обнолено большое количество полей, автовакуум не успел отработать и таблица распухла в 6 раз (5 апдейтов + изначальный размер таблицы).
 ```
 postgres=# UPDATE student SET fio = 'name1';
 UPDATE 1000000
@@ -74,7 +78,7 @@ FROM pg_stat_user_tables WHERE relname = 'student';
 (1 row)
 
 ```
-
+3) После отработки автовакуума размер таблицы не поменялся, т.к. произошла фрагментация памяти.
 ```
 postgres=# SELECT relname, n_live_tup, n_dead_tup,
 trunc(100*n_dead_tup/(n_live_tup+1))::float AS "ratio%", last_autovacuum
@@ -89,12 +93,11 @@ postgres=# SELECT pg_size_pretty(pg_total_relation_size('student'));
 ----------------
  808 MB
 (1 row)
-
 ```
-
+4) Новые записи заняли фрагментированную память, поэтому размер таблицы не увеличился
 ```
 postgres=# UPDATE student SET fio = 'name123456';
-^[[AUPDATE 1000000
+UPDATE 1000000
 postgres=# UPDATE student SET fio = 'name1234567';
 UPDATE 1000000
 postgres=# UPDATE student SET fio = 'name12345678';
@@ -117,8 +120,9 @@ FROM pg_stat_user_tables WHERE relname = 'student';
  student |    1000000 |    2999826 |    299 | 2024-09-07 18:06:12.056018+03
 (1 row)
 ```
-
+5)Отключение автовакуума и обновление полей таблицы. Размер таблицы увеличился в 11 раз по сравнению с начальным.
 ```
+postgres=# alter table student set (autovacuum_enabled = off);
 postgres=# UPDATE student SET fio = 'name12345678901';
 UPDATE 1000000
 postgres=# UPDATE student SET fio = 'name123456789012';
@@ -144,22 +148,9 @@ postgres=# SELECT pg_size_pretty(pg_total_relation_size('student'));
 ----------------
  1482 MB
 (1 row)
-
-postgres=# SELECT relname, n_live_tup, n_dead_tup,
-trunc(100*n_dead_tup/(n_live_tup+1))::float AS "ratio%", last_autovacuum
-FROM pg_stat_user_tables WHERE relname = 'student';
- relname | n_live_tup | n_dead_tup | ratio% |        last_autovacuum        
----------+------------+------------+--------+-------------------------------
- student |    1000000 |    9998535 |    999 | 2024-09-07 18:07:16.219025+03
-(1 row)
 ```
+6) После включение автовакуума размер таблицы не изменился из-за фрагментации.
 ```
-postgres=# SELECT pg_size_pretty(pg_total_relation_size('student'));
- pg_size_pretty 
-----------------
- 1482 MB
-(1 row)
-
 postgres=# SELECT relname, n_live_tup, n_dead_tup,
 trunc(100*n_dead_tup/(n_live_tup+1))::float AS "ratio%", last_autovacuum
 FROM pg_stat_user_tables WHERE relname = 'student';
@@ -168,6 +159,14 @@ FROM pg_stat_user_tables WHERE relname = 'student';
  student |    1003098 |          0 |      0 | 2024-09-07 18:12:50.228346+03
 (1 row)
 
+postgres=# SELECT pg_size_pretty(pg_total_relation_size('student'));
+ pg_size_pretty 
+----------------
+ 1482 MB
+(1 row)
+```
+7) После запуска вакуум фул размер таблицы вернулся к первоначальному.
+```
 postgres=# vacuum full;
 VACUUM
 postgres=# SELECT relname, n_live_tup, n_dead_tup,
