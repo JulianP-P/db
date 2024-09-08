@@ -20,6 +20,22 @@ latency stddev = 65.690 ms
 initial connection time = 59.221 ms
 tps = 983.983951 (without initial connection time)
 ```
+После тююнинга
+```
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 1448143
+number of failed transactions: 0 (0.000%)
+latency average = 20.714 ms
+latency stddev = 26.018 ms
+initial connection time = 54.142 ms
+tps = 2413.454791 (without initial connection time)
+```
 
 ```
 # Connectivity
