@@ -36,11 +36,25 @@ latency stddev = 26.018 ms
 initial connection time = 54.142 ms
 tps = 2413.454791 (without initial connection time)
 ```
-
+```
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 1526344
+number of failed transactions: 0 (0.000%)
+latency average = 19.653 ms
+latency stddev = 24.867 ms
+initial connection time = 48.426 ms
+tps = 2543.758527 (without initial connection time)
+```
+КОнфигурационный файл
 ```
 # Connectivity
 max_connections = 60
-superuser_reserved_connections = 3
 
 # Memory Settings
 shared_buffers = '1024 MB'
