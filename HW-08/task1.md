@@ -35,6 +35,8 @@ latency average = 20.714 ms
 latency stddev = 26.018 ms
 initial connection time = 54.142 ms
 tps = 2413.454791 (without initial connection time)
+1520
+2435
 ```
 ```
 transaction type: <builtin: TPC-B (sort of)>
