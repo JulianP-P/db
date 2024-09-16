@@ -59,12 +59,12 @@ number of clients: 50
 number of threads: 2
 maximum number of tries: 1
 duration: 600 s
-number of transactions actually processed: 590428
+number of transactions actually processed: 691063
 number of failed transactions: 0 (0.000%)
-latency average = 50.808 ms
-latency stddev = 65.690 ms
-initial connection time = 59.221 ms
-tps = 983.983951 (without initial connection time)
+latency average = 43.408 ms
+latency stddev = 57.503 ms
+initial connection time = 51.094 ms
+tps = 1151.708066 (without initial connection time)
 ```
 После тюнинга
 ```
@@ -83,6 +83,16 @@ initial connection time = 54.629 ms
 tps = 2611.540042 (without initial connection time)
 ```
 После было произведенно несколько тестов для выяснения, какие настройки повлияли на производительность больше всего
+1) Memory Settings
+|Настройки|Новые настроики|Старые настройки |Комментарии|
+|---------|---------------|-----------------|-----------|
+|shared_buffers | 1024 MB|
+|work_mem | 32 MB |
+|maintenance_work_mem |320 MB|
+|huge_pages | off |
+|effective_cache_size | 3 GB |
+|effective_io_concurrency | 100 |
+|random_page_cost | 1.25 |
 
 После тюнинга synchronous_commit = on
 ```
