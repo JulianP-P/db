@@ -1,61 +1,9 @@
 ### Нагрузочное тестирование и тюнинг PostgreSQL
-КОманда для теста
+Команда для теста
 ```
 pgbench -c 50 -j 2 -P 10 -T 600 -U postgres postgres
 ```
-
-До тюнинга
-```
-transaction type: <builtin: TPC-B (sort of)>
-scaling factor: 1
-query mode: simple
-number of clients: 50
-number of threads: 2
-maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 590428
-number of failed transactions: 0 (0.000%)
-latency average = 50.808 ms
-latency stddev = 65.690 ms
-initial connection time = 59.221 ms
-tps = 983.983951 (without initial connection time)
-```
-После тююнинга synchronous_commit = on
-```
-transaction type: <builtin: TPC-B (sort of)>
-scaling factor: 1
-query mode: simple
-number of clients: 50
-number of threads: 2
-maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 686589
-number of failed transactions: 0 (0.000%)
-latency average = 43.691 ms
-latency stddev = 56.320 ms
-initial connection time = 65.759 ms
-tps = 1144.255503 (without initial connection time)
-```
-synchronous_commit off
-```
-transaction type: <builtin: TPC-B (sort of)>
-scaling factor: 1
-query mode: simple
-number of clients: 50
-number of threads: 2
-maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 1512182
-number of failed transactions: 0 (0.000%)
-latency average = 19.836 ms
-latency stddev = 24.993 ms
-initial connection time = 57.819 ms
-tps = 2520.230310 (without initial connection time)
-```
-Все вместе
-```
-```
-КОнфигурационный файл
+Конфигурационный файл, который предложил https://pgconfigurator.cybertec.at/
 ```
 # Connectivity
 max_connections = 60
@@ -102,3 +50,71 @@ max_parallel_maintenance_workers = 1
 max_parallel_workers = 1
 parallel_leader_participation = on
 ```
+Производительность до тюнинга
+```
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 590428
+number of failed transactions: 0 (0.000%)
+latency average = 50.808 ms
+latency stddev = 65.690 ms
+initial connection time = 59.221 ms
+tps = 983.983951 (without initial connection time)
+```
+После тюнинга
+```
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 1566987
+number of failed transactions: 0 (0.000%)
+latency average = 19.143 ms
+latency stddev = 24.210 ms
+initial connection time = 54.629 ms
+tps = 2611.540042 (without initial connection time)
+```
+После было произведенно несколько тестов для выяснения, какие настройки повлияли на производительность больше всего
+
+После тюнинга synchronous_commit = on
+```
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 686589
+number of failed transactions: 0 (0.000%)
+latency average = 43.691 ms
+latency stddev = 56.320 ms
+initial connection time = 65.759 ms
+tps = 1144.255503 (without initial connection time)
+```
+synchronous_commit off
+```
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 1512182
+number of failed transactions: 0 (0.000%)
+latency average = 19.836 ms
+latency stddev = 24.993 ms
+initial connection time = 57.819 ms
+tps = 2520.230310 (without initial connection time)
+```
+
+
