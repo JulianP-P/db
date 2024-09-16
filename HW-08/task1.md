@@ -86,13 +86,13 @@ tps = 2611.540042 (without initial connection time)
 1) Memory Settings
 |Настройки|Новые настроики|Старые настройки |Комментарии|
 |---------|---------------|-----------------|-----------|
-|shared_buffers | 1024 MB|
-|work_mem | 32 MB |
-|maintenance_work_mem |320 MB|
-|huge_pages | off |
-|effective_cache_size | 3 GB |
-|effective_io_concurrency | 100 |
-|random_page_cost | 1.25 |
+|shared_buffers | 1024 MB| 128 MB | |
+|work_mem | 32 MB | 4 MB | |
+|maintenance_work_mem |320 MB| 64MB | |
+|huge_pages | off | try | |
+|effective_cache_size | 3 GB | 4 GB | |
+|effective_io_concurrency | 100 | 1 | |
+|random_page_cost | 1.25 | 4 | |
 
 После тюнинга synchronous_commit = on
 ```
