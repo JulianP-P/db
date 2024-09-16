@@ -20,7 +20,7 @@ latency stddev = 65.690 ms
 initial connection time = 59.221 ms
 tps = 983.983951 (without initial connection time)
 ```
-После тююнинга
+После тююнинга synchronous_commit = on
 ```
 transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
@@ -29,15 +29,14 @@ number of clients: 50
 number of threads: 2
 maximum number of tries: 1
 duration: 600 s
-number of transactions actually processed: 1448143
+number of transactions actually processed: 686589
 number of failed transactions: 0 (0.000%)
-latency average = 20.714 ms
-latency stddev = 26.018 ms
-initial connection time = 54.142 ms
-tps = 2413.454791 (without initial connection time)
-1520
-2435
+latency average = 43.691 ms
+latency stddev = 56.320 ms
+initial connection time = 65.759 ms
+tps = 1144.255503 (without initial connection time)
 ```
+synchronous_commit off
 ```
 transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
@@ -46,12 +45,15 @@ number of clients: 50
 number of threads: 2
 maximum number of tries: 1
 duration: 600 s
-number of transactions actually processed: 1526344
+number of transactions actually processed: 1512182
 number of failed transactions: 0 (0.000%)
-latency average = 19.653 ms
-latency stddev = 24.867 ms
-initial connection time = 48.426 ms
-tps = 2543.758527 (without initial connection time)
+latency average = 19.836 ms
+latency stddev = 24.993 ms
+initial connection time = 57.819 ms
+tps = 2520.230310 (without initial connection time)
+```
+Все вместе
+```
 ```
 КОнфигурационный файл
 ```
@@ -83,11 +85,9 @@ checkpoint_completion_target = 0.9
 max_wal_size = '1024 MB'
 min_wal_size = '512 MB'
 
-
 # WAL writing
 wal_compression = on
 wal_buffers = -1 # auto-tuned by Postgres till maximum of segment size (16MB by default)
-
 
 # Background writer
 bgwriter_delay = 200ms
@@ -101,20 +101,4 @@ max_parallel_workers_per_gather = 1
 max_parallel_maintenance_workers = 1
 max_parallel_workers = 1
 parallel_leader_participation = on
-
-# Advanced features
-enable_partitionwise_join = on
-enable_partitionwise_aggregate = on
-jit = on
-max_slot_wal_keep_size = '1000 MB'
-track_wal_io_timing = on
-maintenance_io_concurrency = 100
-wal_recycle = off
-
-
-# General notes:
-# Note that not all settings are automatically tuned.
-# Consider contacting experts at
-# https://www.cybertec-postgresql.com
-# for more professional expertise.
 ```
