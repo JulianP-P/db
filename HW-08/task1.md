@@ -91,8 +91,8 @@ tps = 2611.540042 (without initial connection time)
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
 |shared_buffers | 1024 MB| 128 MB | Буфер для разделяемой памяти рекомендуется брать в 25% от ОЗУ |
-|work_mem | 32 MB | 4 MB | Попробовать поставить 16 МБ |
-|maintenance_work_mem |320 MB| 64MB | Попробовать поставить 200 МБ|
+|work_mem | 32 MB | 4 MB |  |
+|maintenance_work_mem |320 MB| 64MB | |
 |huge_pages | off | try | Запрашивание огромных таблиц из общей памяти отключено|
 |effective_cache_size | 3 GB | 4 GB | Оценка памяти, доступной для кэширования диска, рекомендуется брать в 50-75% от ОЗУ |
 |effective_io_concurrency | 100 | 1 | Число одновременных операций ввода-вывода. Параметр зависит от типа диска. При SSD стоит выбирать значения в несколько сотен|
@@ -115,6 +115,13 @@ tps = 1199.907411 (without initial connection time)
 
 2) Monitoring
 
+При применении следующих настроек производительность практически не изменилась.
+
+|Настройки|Новое значение|Старое значение |Комментарии|
+|---------|--------------|----------------|-----------|
+|shared_preload_libraries |'pg_stat_statements' | 
+|track_io_timing | on | 
+|track_functions | pl |
 ```
 transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
@@ -132,6 +139,15 @@ tps = 1194.113487 (without initial connection time)
 ```
 
 3) Replication
+
+Изменение этих метрик привело к увеличению производительности.
+
+|Настройки|Новое значение|Старое значение |Комментарии|
+|---------|--------------|----------------|-----------|
+|wal_level |replica |
+|max_wal_senders | 0 |
+|synchronous_commit | off |
+
 ```
 transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
@@ -148,7 +164,8 @@ initial connection time = 67.204 ms
 tps = 2699.069206 (without initial connection time)
 ```
 
-только 
+Наибольший вклад внесла метрика synchronous_commit.
+Тест, где все настройки, кроме synchronous_commit, старые.
 ```
 transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
@@ -165,10 +182,37 @@ initial connection time = 55.789 ms
 tps = 2731.484009 (without initial connection time)
 ```
 
+4) Checkpointing
 
 
+|Настройки|Новое значение|Старое значение |Комментарии|
+|---------|--------------|----------------|-----------|
+|checkpoint_timeout | 15 min |
+|checkpoint_completion_target | 0.9 |
+|max_wal_size | 1024 MB |
+|min_wal_size | 512 MB |
 
-После тюнинга synchronous_commit = on
+```
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 561015
+number of failed transactions: 0 (0.000%)
+latency average = 53.472 ms
+latency stddev = 76.008 ms
+initial connection time = 57.261 ms
+tps = 934.963009 (without initial connection time)
+```
+
+5) WAL writing
+
+|Настройки|Новое значение|Старое значение |Комментарии|
+|---------|--------------|----------------|-----------|
+|wal_compression | on |
+|wal_buffers | -1 |
+
 ```
 transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
@@ -177,28 +221,36 @@ number of clients: 50
 number of threads: 2
 maximum number of tries: 1
 duration: 600 s
-number of transactions actually processed: 686589
+number of transactions actually processed: 568169
 number of failed transactions: 0 (0.000%)
-latency average = 43.691 ms
-latency stddev = 56.320 ms
-initial connection time = 65.759 ms
-tps = 1144.255503 (without initial connection time)
+latency average = 52.798 ms
+latency stddev = 70.634 ms
+initial connection time = 53.940 ms
+tps = 946.883606 (without initial connection time)
 ```
-synchronous_commit off
+
+6) Background writer
+
+|Настройки|Новое значение|Старое значение |Комментарии|
+|---------|--------------|----------------|-----------|
+|bgwriter_delay | 200ms |
+|bgwriter_lru_maxpages | 100 |
+|bgwriter_lru_multiplier | 2.0 |
+|bgwriter_flush_after | 0 |
+
 ```
-transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
 query mode: simple
 number of clients: 50
 number of threads: 2
 maximum number of tries: 1
 duration: 600 s
-number of transactions actually processed: 1512182
+number of transactions actually processed: 605656
 number of failed transactions: 0 (0.000%)
-latency average = 19.836 ms
-latency stddev = 24.993 ms
-initial connection time = 57.819 ms
-tps = 2520.230310 (without initial connection time)
+latency average = 49.530 ms
+latency stddev = 63.760 ms
+initial connection time = 53.349 ms
+tps = 1009.357648 (without initial connection time)
 ```
 
 
