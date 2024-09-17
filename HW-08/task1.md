@@ -144,9 +144,9 @@ tps = 1194.113487 (without initial connection time)
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
-|wal_level |replica |
-|max_wal_senders | 0 |
-|synchronous_commit | off |
+|wal_level |replica | replica |
+|max_wal_senders | 0 | 10 |
+|synchronous_commit | off | on |
 
 ```
 transaction type: <builtin: TPC-B (sort of)>
@@ -188,10 +188,10 @@ tps = 2731.484009 (without initial connection time)
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
-|checkpoint_timeout | 15 min |
-|checkpoint_completion_target | 0.9 |
-|max_wal_size | 1024 MB |
-|min_wal_size | 512 MB |
+|checkpoint_timeout | 15 min | 5 min |
+|checkpoint_completion_target | 0.9 | 0.9 |
+|max_wal_size | 1024 MB | 1024 MB |
+|min_wal_size | 512 MB | 80 MB |
 
 ```
 transaction type: <builtin: TPC-B (sort of)>
@@ -215,8 +215,8 @@ tps = 1067.583313 (without initial connection time)
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
-|wal_compression | on |
-|wal_buffers | -1 |
+|wal_compression | on | off |
+|wal_buffers | -1 | 4 MB |
 
 ```
 transaction type: <builtin: TPC-B (sort of)>
@@ -240,10 +240,10 @@ tps = 1124.832512 (without initial connection time)
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
-|bgwriter_delay | 200ms |
-|bgwriter_lru_maxpages | 100 |
-|bgwriter_lru_multiplier | 2.0 |
-|bgwriter_flush_after | 0 |
+|bgwriter_delay | 200ms | 200ms
+|bgwriter_lru_maxpages | 100 | 100 |
+|bgwriter_lru_multiplier | 2.0 | 2.0 |
+|bgwriter_flush_after | 0 | 512 kb |
 
 ```
 transaction type: <builtin: TPC-B (sort of)>
@@ -265,11 +265,11 @@ tps = 1154.980762 (without initial connection time)
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
-|max_worker_processes | 1 |
-|max_parallel_workers_per_gather | 1 |
-|max_parallel_maintenance_workers | 1 |
-|max_parallel_workers | 1 |
-|parallel_leader_participation | on |
+|max_worker_processes | 1 | 8 |
+|max_parallel_workers_per_gather | 1 | 2 |
+|max_parallel_maintenance_workers | 1 | 2 |
+|max_parallel_workers | 1 | 8 |
+|parallel_leader_participation | on | on |
 
 
 ```
