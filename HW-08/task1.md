@@ -119,9 +119,9 @@ tps = 1199.907411 (without initial connection time)
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
-|shared_preload_libraries |'pg_stat_statements' | 
-|track_io_timing | on | 
-|track_functions | pl |
+|shared_preload_libraries |'pg_stat_statements' | - |
+|track_io_timing | on | of |
+|track_functions | pl | none |
 ```
 transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
