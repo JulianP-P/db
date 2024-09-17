@@ -85,7 +85,8 @@ tps = 2611.540042 (without initial connection time)
 После было произведенно несколько тестов для выяснения, какие настройки повлияли на производительность больше всего
 1) Memory Settings
 
-   
+При применении следующих настроек производительность практически не изменилась.
+
 |Настройки|Новые настроики|Старые настройки |Комментарии|
 |---------|---------------|-----------------|-----------|
 |shared_buffers | 1024 MB| 128 MB | |
@@ -95,6 +96,23 @@ tps = 2611.540042 (without initial connection time)
 |effective_cache_size | 3 GB | 4 GB | |
 |effective_io_concurrency | 100 | 1 | |
 |random_page_cost | 1.25 | 4 | |
+```
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 720030
+number of failed transactions: 0 (0.000%)
+latency average = 41.663 ms
+latency stddev = 51.962 ms
+initial connection time = 55.644 ms
+tps = 1199.907411 (without initial connection time)
+```
+
+2) 
 
 После тюнинга synchronous_commit = on
 ```
