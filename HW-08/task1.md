@@ -83,7 +83,7 @@ initial connection time = 54.629 ms
 tps = 2611.540042 (without initial connection time)
 ```
 
-Наибольшее значение на производительность оказал параметр 
+Наибольшее значение на производительность оказал параметр synchronous_commit.
 
 
 
