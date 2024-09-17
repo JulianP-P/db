@@ -44,10 +44,10 @@ bgwriter_lru_multiplier = 2.0
 bgwriter_flush_after = 0
 
 # Parallel queries:
-max_worker_processes = 1
+max_worker_processes = 2
 max_parallel_workers_per_gather = 1
 max_parallel_maintenance_workers = 1
-max_parallel_workers = 1
+max_parallel_workers = 2
 parallel_leader_participation = on
 ```
 Производительность до тюнинга
@@ -82,20 +82,21 @@ latency stddev = 24.210 ms
 initial connection time = 54.629 ms
 tps = 2611.540042 (without initial connection time)
 ```
-После было произведенно несколько тестов для выяснения, какие настройки повлияли на производительность больше всего
+После было произведенно несколько тестов для выяснения, какие настройки повлияли на производительность больше всего.
+Во время теста применялись новые параметры из определенной группы. Все остальные параметры оставались прежними.
 1) Memory Settings
 
 При применении следующих настроек производительность практически не изменилась.
 
-|Настройки|Новые настроики|Старые настройки |Комментарии|
-|---------|---------------|-----------------|-----------|
-|shared_buffers | 1024 MB| 128 MB | |
-|work_mem | 32 MB | 4 MB | |
-|maintenance_work_mem |320 MB| 64MB | |
-|huge_pages | off | try | |
-|effective_cache_size | 3 GB | 4 GB | |
-|effective_io_concurrency | 100 | 1 | |
-|random_page_cost | 1.25 | 4 | |
+|Настройки|Новое значение|Старое значение |Комментарии|
+|---------|--------------|----------------|-----------|
+|shared_buffers | 1024 MB| 128 MB | Буфер для разделяемой памяти рекомендуется брать в 25% от ОЗУ |
+|work_mem | 32 MB | 4 MB | Попробовать поставить 16 МБ |
+|maintenance_work_mem |320 MB| 64MB | Попробовать поставить 200 МБ|
+|huge_pages | off | try | Запрашивание огромных таблиц из общей памяти отключено|
+|effective_cache_size | 3 GB | 4 GB | Оценка памяти, доступной для кэширования диска, рекомендуется брать в 50-75% от ОЗУ |
+|effective_io_concurrency | 100 | 1 | Число одновременных операций ввода-вывода. Параметр зависит от типа диска. При SSD стоит выбирать значения в несколько сотен|
+|random_page_cost | 1.25 | 4 | Стоимость чтения одной произвольной страницы с диска. Параметр зависит от типа диска. При SSD стоит выбирать значения ближе к 1|
 ```
 transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
@@ -112,7 +113,60 @@ initial connection time = 55.644 ms
 tps = 1199.907411 (without initial connection time)
 ```
 
-2) 
+2) Monitoring
+
+```
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 716502
+number of failed transactions: 0 (0.000%)
+latency average = 41.867 ms
+latency stddev = 52.727 ms
+initial connection time = 56.529 ms
+tps = 1194.113487 (without initial connection time)
+```
+
+3) Replication
+```
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 1619457
+number of failed transactions: 0 (0.000%)
+latency average = 18.520 ms
+latency stddev = 23.640 ms
+initial connection time = 67.204 ms
+tps = 2699.069206 (without initial connection time)
+```
+
+только 
+```
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 1638944
+number of failed transactions: 0 (0.000%)
+latency average = 18.301 ms
+latency stddev = 23.693 ms
+initial connection time = 55.789 ms
+tps = 2731.484009 (without initial connection time)
+```
+
+
+
 
 После тюнинга synchronous_commit = on
 ```
