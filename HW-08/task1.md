@@ -184,6 +184,7 @@ tps = 2731.484009 (without initial connection time)
 
 4) Checkpointing
 
+Применение метрик снизило производительность
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
@@ -193,20 +194,24 @@ tps = 2731.484009 (without initial connection time)
 |min_wal_size | 512 MB |
 
 ```
+transaction type: <builtin: TPC-B (sort of)>
+scaling factor: 1
 query mode: simple
 number of clients: 50
 number of threads: 2
 maximum number of tries: 1
 duration: 600 s
-number of transactions actually processed: 561015
+number of transactions actually processed: 640588
 number of failed transactions: 0 (0.000%)
-latency average = 53.472 ms
-latency stddev = 76.008 ms
-initial connection time = 57.261 ms
-tps = 934.963009 (without initial connection time)
+latency average = 46.829 ms
+latency stddev = 69.050 ms
+initial connection time = 50.015 ms
+tps = 1067.583313 (without initial connection time)
 ```
 
 5) WAL writing
+
+Применение метрик снизило производительность
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
@@ -221,15 +226,17 @@ number of clients: 50
 number of threads: 2
 maximum number of tries: 1
 duration: 600 s
-number of transactions actually processed: 568169
+number of transactions actually processed: 674938
 number of failed transactions: 0 (0.000%)
-latency average = 52.798 ms
-latency stddev = 70.634 ms
-initial connection time = 53.940 ms
-tps = 946.883606 (without initial connection time)
+latency average = 44.445 ms
+latency stddev = 65.378 ms
+initial connection time = 54.759 ms
+tps = 1124.832512 (without initial connection time)
 ```
 
 6) Background writer
+
+Применение метрик снизило производительность
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
@@ -239,18 +246,43 @@ tps = 946.883606 (without initial connection time)
 |bgwriter_flush_after | 0 |
 
 ```
+transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
 query mode: simple
 number of clients: 50
 number of threads: 2
 maximum number of tries: 1
 duration: 600 s
-number of transactions actually processed: 605656
+number of transactions actually processed: 693028
 number of failed transactions: 0 (0.000%)
-latency average = 49.530 ms
-latency stddev = 63.760 ms
-initial connection time = 53.349 ms
-tps = 1009.357648 (without initial connection time)
+latency average = 43.285 ms
+latency stddev = 97.706 ms
+initial connection time = 57.642 ms
+tps = 1154.980762 (without initial connection time)
 ```
 
+7) Parallel queries
 
+|Настройки|Новое значение|Старое значение |Комментарии|
+|---------|--------------|----------------|-----------|
+|max_worker_processes | 1 |
+|max_parallel_workers_per_gather | 1 |
+|max_parallel_maintenance_workers | 1 |
+|max_parallel_workers | 1 |
+|parallel_leader_participation | on |
+
+
+```
+scaling factor: 1
+query mode: simple
+number of clients: 50
+number of threads: 2
+maximum number of tries: 1
+duration: 600 s
+number of transactions actually processed: 711027
+number of failed transactions: 0 (0.000%)
+latency average = 42.191 ms
+latency stddev = 53.506 ms
+initial connection time = 54.557 ms
+tps = 1184.850339 (without initial connection time)
+```
