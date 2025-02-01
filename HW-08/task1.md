@@ -59,12 +59,12 @@ number of clients: 50
 number of threads: 2
 maximum number of tries: 1
 duration: 600 s
-number of transactions actually processed: 691063
+number of transactions actually processed: 1133438
 number of failed transactions: 0 (0.000%)
-latency average = 43.408 ms
-latency stddev = 57.503 ms
-initial connection time = 51.094 ms
-tps = 1151.708066 (without initial connection time)
+latency average = 26.465 ms
+latency stddev = 36.133 ms
+initial connection time = 58.874 ms
+tps = 1889.156374 (without initial connection time)
 ```
 После тюнинга
 ```
