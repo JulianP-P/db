@@ -107,11 +107,11 @@ select name, setting, unit, sourcefile from pg_settings where name in ('shared_b
 |---------|--------------|----------------|-----------|
 |shared_buffers | 1024 MB| 128 MB | Буфер для разделяемой памяти рекомендуется брать в 25% от ОЗУ |
 |work_mem | 32 MB | 4 MB | Память, которая будет используется при обработке запросов. Выделяется для каждого процесса. |
-|maintenance_work_mem |320 MB| 64MB | Максимальный объём памяти для операций VACUUM, CREATE INDEX и ALTER TABLE ADD FOREIGN KEY |
+|maintenance_work_mem |320 MB| 64 MB | Максимальный объём памяти для операций VACUUM, CREATE INDEX и ALTER TABLE ADD FOREIGN KEY |
 |huge_pages | off | try | Запрашивание огромных таблиц из общей памяти отключено|
-|effective_cache_size | 3 GB | 4 GB | Оценка памяти, доступной для кэширования диска, рекомендуется брать в 50-75% от ОЗУ |
-|effective_io_concurrency | 100 | 1 | Число одновременных операций ввода-вывода. Параметр зависит от типа диска. При SSD стоит выбирать значения в несколько сотен|
-|random_page_cost | 1.25 | 4 | Стоимость чтения одной произвольной страницы с диска. Параметр зависит от типа диска. При SSD стоит выбирать значения ближе к 1|
+|effective_cache_size | 11 GB | 4 GB | Оценка памяти, доступной для кэширования диска, рекомендуется брать в 50-75% от ОЗУ |
+|effective_io_concurrency | 1 | 1 | Число одновременных операций ввода-вывода. Параметр зависит от типа диска. При SSD стоит выбирать значения в несколько сотен|
+|random_page_cost | 4 | 4 | Стоимость чтения одной произвольной страницы с диска. Параметр зависит от типа диска. При SSD стоит выбирать значения ближе к 1|
 ```
 transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
@@ -128,7 +128,10 @@ initial connection time = 62.015 ms
 tps = 1860.886103 (without initial connection time)
 ```
 
-2) Monitoring
+### 2) Monitoring
+```sql
+select name, setting, unit, sourcefile from pg_settings where name in ('shared_preload_libraries', 'track_io_timing', 'track_functions');
+```
 
 При применении следующих настроек производительность практически не изменилась.
 
@@ -144,17 +147,19 @@ query mode: simple
 number of clients: 50
 number of threads: 2
 maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 716502
+duration: 300 s
+number of transactions actually processed: 554214
 number of failed transactions: 0 (0.000%)
-latency average = 41.867 ms
-latency stddev = 52.727 ms
-initial connection time = 56.529 ms
-tps = 1194.113487 (without initial connection time)
+latency average = 27.060 ms
+latency stddev = 37.255 ms
+initial connection time = 58.711 ms
+tps = 1847.563321 (without initial connection time)
 ```
 
-3) Replication
-
+### 3) Replication
+```sql
+select name, setting, unit, sourcefile from pg_settings where name in ('wal_level', 'max_wal_senders', 'synchronous_commit');
+```
 Изменение этих метрик привело к увеличению производительности.
 
 |Настройки|Новое значение|Старое значение |Комментарии|
@@ -170,16 +175,16 @@ query mode: simple
 number of clients: 50
 number of threads: 2
 maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 1619457
+duration: 300 s
+number of transactions actually processed: 1927988
 number of failed transactions: 0 (0.000%)
-latency average = 18.520 ms
-latency stddev = 23.640 ms
-initial connection time = 67.204 ms
-tps = 2699.069206 (without initial connection time)
+latency average = 7.778 ms
+latency stddev = 10.661 ms
+initial connection time = 61.670 ms
+tps = 6427.607412 (without initial connection time)
 ```
 
-Наибольший вклад внесла метрика synchronous_commit.
+**Наибольший вклад внесла метрика synchronous_commit.**
 Тест, где все настройки, кроме synchronous_commit, старые.
 ```
 transaction type: <builtin: TPC-B (sort of)>
@@ -188,18 +193,20 @@ query mode: simple
 number of clients: 50
 number of threads: 2
 maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 1638944
+duration: 300 s
+number of transactions actually processed: 1955794
 number of failed transactions: 0 (0.000%)
-latency average = 18.301 ms
-latency stddev = 23.693 ms
-initial connection time = 55.789 ms
-tps = 2731.484009 (without initial connection time)
+latency average = 7.667 ms
+latency stddev = 10.567 ms
+initial connection time = 62.401 ms
+tps = 6520.263292 (without initial connection time)
 ```
 
-4) Checkpointing
-
-Применение метрик снизило производительность
+### 4) Checkpointing
+```sql
+select name, setting, unit, sourcefile from pg_settings where name in ('checkpoint_timeout', 'checkpoint_completion_target', 'max_wal_size', 'min_wal_size');
+```
+При применении следующих настроек производительность практически не изменилась.
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
@@ -209,24 +216,25 @@ tps = 2731.484009 (without initial connection time)
 |min_wal_size | 512 MB | 80 MB |
 
 ```
-transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
 query mode: simple
 number of clients: 50
 number of threads: 2
 maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 640588
+duration: 300 s
+number of transactions actually processed: 567613
 number of failed transactions: 0 (0.000%)
-latency average = 46.829 ms
-latency stddev = 69.050 ms
-initial connection time = 50.015 ms
-tps = 1067.583313 (without initial connection time)
+latency average = 26.421 ms
+latency stddev = 35.287 ms
+initial connection time = 59.801 ms
+tps = 1892.268002 (without initial connection time)
 ```
 
-5) WAL writing
-
-Применение метрик снизило производительность
+### 5) WAL writing
+```sql
+select name, setting, unit, sourcefile from pg_settings where name in ('wal_compression', 'wal_buffers');
+```
+При применении следующих настроек производительность немного повысилась.
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
@@ -240,18 +248,21 @@ query mode: simple
 number of clients: 50
 number of threads: 2
 maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 674938
+duration: 300 s
+number of transactions actually processed: 701818
 number of failed transactions: 0 (0.000%)
-latency average = 44.445 ms
-latency stddev = 65.378 ms
-initial connection time = 54.759 ms
-tps = 1124.832512 (without initial connection time)
+latency average = 21.370 ms
+latency stddev = 24.492 ms
+initial connection time = 42.333 ms
+tps = 2339.531194 (without initial connection time)
 ```
 
-6) Background writer
+### 6) Background writer
+```sql
+select name, setting, unit, sourcefile from pg_settings where name in ('bgwriter_delay', 'bgwriter_lru_maxpages', 'bgwriter_lru_multiplier', 'bgwriter_flush_after');
+```
 
-Применение метрик снизило производительность
+При применении следующих настроек производительность немного повысилась.
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
@@ -267,16 +278,19 @@ query mode: simple
 number of clients: 50
 number of threads: 2
 maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 693028
+duration: 300 s
+number of transactions actually processed: 700070
 number of failed transactions: 0 (0.000%)
-latency average = 43.285 ms
-latency stddev = 97.706 ms
-initial connection time = 57.642 ms
-tps = 1154.980762 (without initial connection time)
+latency average = 21.424 ms
+latency stddev = 24.676 ms
+initial connection time = 44.246 ms
+tps = 2333.728822 (without initial connection time)
 ```
 
 7) Parallel queries
+```sql
+select name, setting, unit, sourcefile from pg_settings where name in ('max_worker_processes', 'max_parallel_workers_per_gather', 'max_parallel_maintenance_workers', 'max_parallel_workers', 'parallel_leader_particion');
+```
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
