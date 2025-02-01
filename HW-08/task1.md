@@ -95,11 +95,6 @@ latency stddev = 10.697 ms
 initial connection time = 63.404 ms
 tps = 6321.807651 (without initial connection time)
 ```
-
-
-
-
-
 После было произведенно несколько тестов для выяснения, какие настройки повлияли на производительность больше всего.
 Во время теста применялись новые параметры из определенной группы. Все остальные параметры оставались прежними.
 ### 1) Memory Settings
@@ -124,13 +119,13 @@ query mode: simple
 number of clients: 50
 number of threads: 2
 maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 720030
+duration: 300 s
+number of transactions actually processed: 558208
 number of failed transactions: 0 (0.000%)
-latency average = 41.663 ms
-latency stddev = 51.962 ms
-initial connection time = 55.644 ms
-tps = 1199.907411 (without initial connection time)
+latency average = 26.867 ms
+latency stddev = 36.133 ms
+initial connection time = 62.015 ms
+tps = 1860.886103 (without initial connection time)
 ```
 
 2) Monitoring
