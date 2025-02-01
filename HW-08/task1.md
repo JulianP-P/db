@@ -137,9 +137,9 @@ select name, setting, unit, sourcefile from pg_settings where name in ('shared_p
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
-|shared_preload_libraries |'pg_stat_statements' | - |
-|track_io_timing | on | of |
-|track_functions | pl | none |
+|shared_preload_libraries |'pg_stat_statements' | - | В этом параметре задаются библиотеки, которые будут загружаться при запуске сервера. |
+|track_io_timing | on | of | Включает мониторинг времени чтения и записи блоков. |
+|track_functions | pl | none | Включает подсчёт вызовов функций и времени их выполнения. Значение pl включает отслеживание только функций на процедурном языке, а all — также функций на языках SQL и C. |
 ```
 transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
@@ -164,9 +164,9 @@ select name, setting, unit, sourcefile from pg_settings where name in ('wal_leve
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
-|wal_level |replica | replica |
-|max_wal_senders | 0 | 10 |
-|synchronous_commit | off | on |
+|wal_level |replica | replica | Параметр определяет, как много информации записывается в WAL. Возможные значения replica, minimal, logical. Со значением replica в журнал записываются данные, необходимые для поддержки архивирования WAL и репликации, включая запросы только на чтение на ведомом сервере. |
+|max_wal_senders | 0 | 10 | Задаёт максимально допустимое число одновременных подключений ведомых серверов или клиентов потокового копирования. |
+|synchronous_commit | off | on | Параметр, который определяет, когда транзакции считаются зафиксированными и в какой момент клиент получает подтверждение об этом. Транзакции считаются зафиксированными только после того, как записи WAL будут записаны на диск.  Транзакции считаются зафиксированными сразу после записи в журнал WAL, без ожидания записи на диск. Другие возможные значения: remote_write, local, remote_apply |
 
 ```
 transaction type: <builtin: TPC-B (sort of)>
