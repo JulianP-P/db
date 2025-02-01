@@ -96,13 +96,13 @@ initial connection time = 63.404 ms
 tps = 6321.807651 (without initial connection time)
 ```
 
-Наибольшее значение на производительность оказал параметр synchronous_commit.
+
 
 
 
 После было произведенно несколько тестов для выяснения, какие настройки повлияли на производительность больше всего.
 Во время теста применялись новые параметры из определенной группы. Все остальные параметры оставались прежними.
-1) Memory Settings
+### 1) Memory Settings
 ```sql
 select name, setting, unit, sourcefile from pg_settings where name in ('shared_buffers', 'work_mem', 'maintenance_work_mem', 'huge_pages', 'effective_cache_size', 'effective_io_concurrency', 'random_page_cost');
 ```
@@ -306,3 +306,4 @@ latency stddev = 53.506 ms
 initial connection time = 54.557 ms
 tps = 1184.850339 (without initial connection time)
 ```
+**Наибольшее значение на производительность оказал параметр synchronous_commit.**
