@@ -287,32 +287,32 @@ initial connection time = 44.246 ms
 tps = 2333.728822 (without initial connection time)
 ```
 
-7) Parallel queries
+### 7) Parallel queries
 ```sql
-select name, setting, unit, sourcefile from pg_settings where name in ('max_worker_processes', 'max_parallel_workers_per_gather', 'max_parallel_maintenance_workers', 'max_parallel_workers', 'parallel_leader_particion');
+select name, setting, unit, sourcefile from pg_settings where name in ('max_worker_processes', 'max_parallel_workers_per_gather', 'max_parallel_maintenance_workers', 'max_parallel_workers', 'parallel_leader_participation');
 ```
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
 |max_worker_processes | 1 | 8 |
-|max_parallel_workers_per_gather | 1 | 2 |
-|max_parallel_maintenance_workers | 1 | 2 |
+|max_parallel_workers_per_gather | 1 | 4 |
+|max_parallel_maintenance_workers | 1 | 4 |
 |max_parallel_workers | 1 | 8 |
 |parallel_leader_participation | on | on |
 
-
 ```
+transaction type: <builtin: TPC-B (sort of)>
 scaling factor: 1
 query mode: simple
 number of clients: 50
 number of threads: 2
 maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 711027
+duration: 300 s
+number of transactions actually processed: 700750
 number of failed transactions: 0 (0.000%)
-latency average = 42.191 ms
-latency stddev = 53.506 ms
-initial connection time = 54.557 ms
-tps = 1184.850339 (without initial connection time)
+latency average = 21.403 ms
+latency stddev = 24.287 ms
+initial connection time = 44.512 ms
+tps = 2335.972923 (without initial connection time)
 ```
 **Наибольшее значение на производительность оказал параметр synchronous_commit.**
