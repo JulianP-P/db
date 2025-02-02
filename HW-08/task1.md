@@ -210,7 +210,7 @@ select name, setting, unit, sourcefile from pg_settings where name in ('checkpoi
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
-|checkpoint_timeout | 15 min | 5 min |
+|checkpoint_timeout | 15 min | 5 min | Параметр, который устанавливает максимальное время между автоматическими контрольными точками в WAL |
 |checkpoint_completion_target | 0.9 | 0.9 |
 |max_wal_size | 1024 MB | 1024 MB |
 |min_wal_size | 512 MB | 80 MB |
