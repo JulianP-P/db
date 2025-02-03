@@ -52,15 +52,6 @@ max_parallel_workers_per_gather = 4
 max_parallel_maintenance_workers = 4
 max_parallel_workers = 8
 parallel_leader_participation = on
-
-# Advanced features
-enable_partitionwise_join = on
-enable_partitionwise_aggregate = on
-jit = on
-max_slot_wal_keep_size = '1000 MB'
-track_wal_io_timing = on
-maintenance_io_concurrency = 1
-wal_recycle = off
 ```
 
 Производительность до тюнинга
@@ -211,9 +202,9 @@ select name, setting, unit, sourcefile from pg_settings where name in ('checkpoi
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
 |checkpoint_timeout | 15 min | 5 min | Параметр, который устанавливает максимальное время между автоматическими контрольными точками в WAL |
-|checkpoint_completion_target | 0.9 | 0.9 |
-|max_wal_size | 1024 MB | 1024 MB |
-|min_wal_size | 512 MB | 80 MB |
+|checkpoint_completion_target | 0.9 | 0.9 | Чтобы избежать «заваливания» системы ввода/вывода при резкой интенсивной записи страниц, запись «грязных» буферов во время контрольной точки растягивается на определённый период времени. Этот период управляется параметром checkpoint_completion_target, который задаётся как часть интервала между контрольными точками.  Со значением 0.9, заданным по умолчанию, можно ожидать, что PostgreSQL завершит процедуру контрольной точки незадолго до следующей запланированной (примерно на 90% выполнения предыдущей контрольной точки).|
+|max_wal_size | 1024 MB | 1024 MB | - |
+|min_wal_size | 512 MB | 80 MB | - |
 
 ```
 scaling factor: 1
@@ -266,10 +257,10 @@ select name, setting, unit, sourcefile from pg_settings where name in ('bgwriter
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
-|bgwriter_delay | 200ms | 200ms
-|bgwriter_lru_maxpages | 100 | 100 |
-|bgwriter_lru_multiplier | 2.0 | 2.0 |
-|bgwriter_flush_after | 0 | 512 kb |
+|bgwriter_delay | 200ms | 200ms | В числе специальных процессов сервера есть процесс фоновой записи, задача которого — осуществлять запись «грязных» (новых или изменённых) общих буферов на диск. Задаёт задержку между раундами активности процесса фоновой записи. Во время раунда этот процесс осуществляет запись некоторого количества загрязнённых буферов (это настраивается следующими параметрами). Затем он засыпает на время bgwriter_delay, и всё повторяется снова. | 
+|bgwriter_lru_maxpages | 100 | 100 | Задаёт максимальное число буферов, которое сможет записать процесс фоновой записи за раунд активности.|
+|bgwriter_lru_multiplier | 2.0 | 2.0 | Число загрязнённых буферов, записываемых в очередном раунде, зависит от того, сколько новых буферов требовалось серверным процессам в предыдущих раундах. Средняя недавняя потребность умножается на bgwriter_lru_multiplier и предполагается, что именно столько буферов потребуется на следующем раунде. |
+|bgwriter_flush_after | 0 | 512 kb | Если объём всех записанных «грязных» страниц превысит заданное этим параметром значение, то Background Writer заставит ОС записать данные из своего кэша непосредственно на диск. |
 
 ```
 transaction type: <builtin: TPC-B (sort of)>
@@ -294,11 +285,11 @@ select name, setting, unit, sourcefile from pg_settings where name in ('max_work
 
 |Настройки|Новое значение|Старое значение |Комментарии|
 |---------|--------------|----------------|-----------|
-|max_worker_processes | 1 | 8 |
-|max_parallel_workers_per_gather | 1 | 4 |
-|max_parallel_maintenance_workers | 1 | 4 |
-|max_parallel_workers | 1 | 8 |
-|parallel_leader_participation | on | on |
+|max_worker_processes | 1 | 8 | Максимальное число фоновых процессов, которое можно запустить в текущей системе. |
+|max_parallel_workers_per_gather | 1 | 4 | Задаёт максимальное число рабочих процессов, которые могут запускаться одним узлом Gather или Gather Merge. Параллельные рабочие процессы берутся из пула процессов, контролируемого параметром max_worker_processes, в количестве, ограничиваемом значением max_parallel_workers. |
+|max_parallel_maintenance_workers | 1 | 4 | Задаёт максимальное число рабочих процессов, которые могут запускаться одной служебной командой. В настоящее время параллельные процессы может использовать только CREATE INDEX при построении индекса-B-дерева и VACUUM без указания FULL. |
+|max_parallel_workers | 1 | 8 | - |
+|parallel_leader_participation | on | on |определяет, будет ли ведущий процесс участвовать в параллельном выполнении запроса|
 
 ```
 transaction type: <builtin: TPC-B (sort of)>
