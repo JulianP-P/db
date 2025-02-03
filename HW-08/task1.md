@@ -125,7 +125,7 @@ random_page_cost = 1 # speed of random disk access relative to sequential access
 |Производительность|1875        |6225       |4 GB    |4 GB           | 
 
 После было произведенно несколько тестов для выяснения, какие настройки повлияли на производительность больше всего.
-Во время теста применялись новые параметры из определенной группы. Все остальные параметры оставались прежними.
+Во время теста применялись новые параметры из определенной группы. Все остальные параметры оставались по умолчанию.
 ### 1) Memory Settings
 ```sql
 select name, setting, unit, sourcefile from pg_settings where name in ('shared_buffers', 'work_mem', 'maintenance_work_mem', 'huge_pages', 'effective_cache_size', 'effective_io_concurrency', 'random_page_cost');
