@@ -53,7 +53,7 @@ max_parallel_maintenance_workers = 4
 max_parallel_workers = 8
 parallel_leader_participation = on
 ```
-Конфигурация, которую предложил PgTune
+Конфигурация, которую предложил [PgTune](https://pgtune.fariton.ru/)
 ```
 # DB Version: 15
 # OS Type: linux
@@ -81,40 +81,11 @@ max_parallel_workers_per_gather = 4
 max_parallel_workers = 8
 max_parallel_maintenance_workers = 4
 ```
+Производительность при разных конфигурациях:
+|                  |По умолчанию|Pgconfigurator|PgTune  |Мое предложение|
+|:-----------------|:-----------|:-------------|:-------|---------------|
+|Производительность|128 MB      |1024 MB       |4 GB    |4 GB           | 
 
-
-Производительность до тюнинга
-```
-transaction type: <builtin: TPC-B (sort of)>
-scaling factor: 1
-query mode: simple
-number of clients: 50
-number of threads: 2
-maximum number of tries: 1
-duration: 600 s
-number of transactions actually processed: 1133736
-number of failed transactions: 0 (0.000%)
-latency average = 26.458 ms
-latency stddev = 36.175 ms
-initial connection time = 63.400 ms
-tps = 1889.665834 (without initial connection time)
-```
-После тюнинга
-```
-transaction type: <builtin: TPC-B (sort of)>
-scaling factor: 1
-query mode: simple
-number of clients: 50
-number of threads: 2
-maximum number of tries: 1
-duration: 300 s
-number of transactions actually processed: 1896283
-number of failed transactions: 0 (0.000%)
-latency average = 7.908 ms
-latency stddev = 10.697 ms
-initial connection time = 63.404 ms
-tps = 6321.807651 (without initial connection time)
-```
 После было произведенно несколько тестов для выяснения, какие настройки повлияли на производительность больше всего.
 Во время теста применялись новые параметры из определенной группы. Все остальные параметры оставались прежними.
 ### 1) Memory Settings
