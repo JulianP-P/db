@@ -1,9 +1,33 @@
-### Нагрузочное тестирование и тюнинг PostgreSQL
-Команда для теста
+# Нагрузочное тестирование и тюнинг PostgreSQL
+Для получения оптимальных параметров был проведен ряд тестов с разными конфигурациями. Источники конфигураций:
+-  [Pgconfigurator](https://pgconfigurator.cybertec.at/)
+-  [PgTune](https://pgtune.fariton.ru/)
+- собственное предложение на основе рекомендаций из интернета
+  
+Команда для теста. Для получения наиболее корректных значений каждый тест запускался три раза. Результат - среднее значение.
 ```
 pgbench -c 50 -j 2 -P 10 -T 300 -U postgres postgres
 ```
-Конфигурационный файл, который предложил https://pgconfigurator.cybertec.at/
+### Параметры для генерации файла с конфигами
+```
+# DB Version: 15
+# OS Type: linux
+# DB Type: oltp
+# Total Memory (RAM): 16 GB
+# CPUs num: 8
+# Connections num: 60
+# Data Storage: ssd
+Number of disks: 1
+How big is your database?: 1 GB
+How many replicas do you need?: 0
+Do you want to activate wal recycling?: No
+Can you lose single transactions in case of a crash?: Yes
+Are you willing to try out experimental features for better performance?: No
+```
+
+
+### Pgconfigurator
+Конфигурационный файл, который предложил [Pgconfigurator](https://pgconfigurator.cybertec.at/)
 ```
 # Connectivity
 max_connections = 60
@@ -53,6 +77,7 @@ max_parallel_maintenance_workers = 4
 max_parallel_workers = 8
 parallel_leader_participation = on
 ```
+### PgTune
 Конфигурация, которую предложил [PgTune](https://pgtune.fariton.ru/)
 ```
 # DB Version: 15
@@ -81,10 +106,14 @@ max_parallel_workers_per_gather = 4
 max_parallel_workers = 8
 max_parallel_maintenance_workers = 4
 ```
+### Собственный конфиг
+```
+```
+## Сравнение
 Производительность при разных конфигурациях:
 |                  |По умолчанию|Pgconfigurator|PgTune  |Мое предложение|
 |:-----------------|:-----------|:-------------|:-------|---------------|
-|Производительность|128 MB      |1024 MB       |4 GB    |4 GB           | 
+|Производительность|1874        |1024 MB       |4 GB    |4 GB           | 
 
 После было произведенно несколько тестов для выяснения, какие настройки повлияли на производительность больше всего.
 Во время теста применялись новые параметры из определенной группы. Все остальные параметры оставались прежними.
