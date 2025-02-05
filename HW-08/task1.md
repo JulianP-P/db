@@ -51,7 +51,7 @@ track_functions=pl # track execution times of pl-language procedures if any
 # Replication
 wal_level = replica # consider using at least 'replica'
 max_wal_senders = 0
-synchronous_commit = on
+synchronous_commit = off
 
 # Checkpointing:
 checkpoint_timeout = '15 min'
@@ -59,11 +59,10 @@ checkpoint_completion_target = 0.9
 max_wal_size = '1024 MB'
 min_wal_size = '512 MB'
 
+
 # WAL writing
 wal_compression = on
 wal_buffers = -1 # auto-tuned by Postgres till maximum of segment size (16MB by default)
-wal_writer_delay = 200ms
-wal_writer_flush_after = 1MB
 
 # Parallel queries:
 max_worker_processes = 8
@@ -130,7 +129,7 @@ min_wal_size = '2 GB'
 Производительность при разных конфигурациях:
 |                  |По умолчанию|Pgconfigurator|PgTune  |Мое предложение|
 |:-----------------|:-----------|:-------------|:-------|---------------|
-|Производительность|2338        |6190          |2335    |4 GB           | 
+|Производительность|2338        |6190          |2335    |7183           | 
 
 После было произведенно несколько тестов для выяснения, какие настройки повлияли на производительность больше всего.
 Во время теста применялись новые параметры из определенной группы. Все остальные параметры оставались по умолчанию.
