@@ -4,7 +4,8 @@
 -  [Pgconfigurator](https://pgconfigurator.cybertec.at/)
 -  [PgTune](https://pgtune.fariton.ru/)
 - собственное предложение на основе рекомендаций из интернета
-  
+
+
 Команда для теста:
 ```
 pgbench -c 50 -j 2 -P 10 -T 300 -U postgres postgres
@@ -220,5 +221,86 @@ Pgconfigurator и PgTune совпадают.
 |max_parallel_workers            |8           |8             |- |
 |**tps**                         |2338        |2337          ||
 
+## Анализ результатов
 
 **Наибольшее значение на производительность оказал параметр synchronous_commit.**
+
+Наилучший результат показал мой конфиг и конфиг Pgconfigurator. Но конфигурация Pgconfigurator показывает несколько меньшие значения. Причина - настройки мониторинга.
+Производительность с конфигурацией Pgconfigurator кроме блока параметров мониторинга составила 7324 tps.
+```
+# Connectivity
+max_connections = 100
+superuser_reserved_connections = 3
+
+# Memory Settings
+shared_buffers = '1024 MB'
+work_mem = '32 MB'
+maintenance_work_mem = '320 MB'
+huge_pages = off
+effective_cache_size = '11 GB'
+effective_io_concurrency = 100 # concurrent IO only really activated if OS supports posix_fadvise function
+random_page_cost = 1.25 # speed of random disk access relative to sequential access (1.0)
+
+# Replication
+wal_level = replica # consider using at least 'replica'
+max_wal_senders = 0
+synchronous_commit = off
+
+# Checkpointing:
+checkpoint_timeout = '15 min'
+checkpoint_completion_target = 0.9
+max_wal_size = '1024 MB'
+min_wal_size = '512 MB'
+
+# WAL writing
+wal_compression = on
+wal_buffers = -1 # auto-tuned by Postgres till maximum of segment size (16MB by default)
+
+# Parallel queries:
+max_worker_processes = 8
+max_parallel_workers_per_gather = 4
+max_parallel_maintenance_workers = 4
+max_parallel_workers = 8
+```
+Теперь производительность поправленной конфигурации Pgconfigurator показывает бОльшую производительность, чем мой конфиг. На этот раз причина в блоке Parallel queries.
+Производительность со следующим конфигом 7325 tps.
+```
+# Connectivity
+max_connections = 100
+superuser_reserved_connections = 3
+
+# Memory Settings
+shared_buffers = '4 GB'
+work_mem = '41 MB'
+huge_pages = off
+effective_cache_size = '12 GB'
+effective_io_concurrency = 200 # concurrent IO only really activated if OS supports posix_fadvise function
+random_page_cost = 1 # speed of random disk access relative to sequential access (1.0)
+
+# Replication
+wal_level = minimal
+max_wal_senders = 0
+synchronous_commit = off
+
+# Checkpointing:
+checkpoint_timeout = '30 min'
+checkpoint_completion_target = 0.9
+max_wal_size = '8 GB'
+min_wal_size = '2 GB'
+
+# Parallel queries:
+max_worker_processes = 8
+max_parallel_workers_per_gather = 4
+max_parallel_maintenance_workers = 4
+max_parallel_workers = 8
+```
+
+Таким образом на производительность в данном случае повлияли следующие метрики
+- synchronous_commit
+- shared_preload_libraries
+- track_io_timing
+- track_functions
+- max_worker_processes
+- max_parallel_workers_per_gather
+- max_parallel_maintenance_workers
+- max_parallel_workers
