@@ -218,7 +218,8 @@ select name, setting, unit, sourcefile from pg_settings where name in ('checkpoi
 ```sql
 select name, setting, unit, sourcefile from pg_settings where name in ('wal_compression', 'wal_buffers');
 ```
-При применении следующих настроек производительность немного повысилась.
+По моему мнению, самые оптимальные параметры, те, которые предложены по умолчанию.
+При применении следующих настроек производительность не изменилась.
 
 |Настройки      |По умолчанию|Pgconfigurator|PgTune|Комментарии|
 |:--------      |:-----------|:-------------|:-----|:----------|
@@ -230,6 +231,7 @@ select name, setting, unit, sourcefile from pg_settings where name in ('wal_comp
 ```sql
 select name, setting, unit, sourcefile from pg_settings where name in ('max_worker_processes', 'max_parallel_workers_per_gather', 'max_parallel_maintenance_workers', 'max_parallel_workers', 'parallel_leader_participation');
 ```
+По моему мнению, самые оптимальные параметры, те, которые предложены по умолчанию
 Pgconfigurator и PgTune совпадают.
 |Настройки                       |По умолчанию|Pgconfigurator и PgTune|Комментарии|
 |:-------------------------------|:-----------|:-------------|:-----|
