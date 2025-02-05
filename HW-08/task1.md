@@ -5,7 +5,6 @@
 -  [PgTune](https://pgtune.fariton.ru/)
 - собственное предложение на основе рекомендаций из интернета
 
-
 Команда для теста:
 ```
 pgbench -c 50 -j 2 -P 10 -T 300 -U postgres postgres
@@ -26,7 +25,6 @@ Do you want to activate wal recycling?: No
 Can you lose single transactions in case of a crash?: Yes
 Are you willing to try out experimental features for better performance?: No
 ```
-
 
 ### Pgconfigurator
 Конфигурационный файл, который предложил [Pgconfigurator](https://pgconfigurator.cybertec.at/)
