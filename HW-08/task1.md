@@ -109,41 +109,22 @@ superuser_reserved_connections = 3
 
 # Memory Settings
 shared_buffers = '4 GB'
-work_mem = '32 MB'
-maintenance_work_mem = '320 MB'
+work_mem = '41 MB'
 huge_pages = off
-effective_cache_size = '11 GB'
-effective_io_concurrency = 100 # concurrent IO only really activated if OS supports posix_fadvise function
-random_page_cost = 1.25 # speed of random disk access relative to sequential access (1.0)
-
-# Monitoring
-shared_preload_libraries = 'pg_stat_statements' # per statement resource usage stats
-track_io_timing=on # measure exact block IO times
-track_functions=pl # track execution times of pl-language procedures if any
+effective_cache_size = '12 GB'
+effective_io_concurrency = 200 # concurrent IO only really activated if OS supports posix_fadvise function
+random_page_cost = 1 # speed of random disk access relative to sequential access (1.0)
 
 # Replication
-wal_level = replica # consider using at least 'replica'
+wal_level = minimal
 max_wal_senders = 0
-synchronous_commit = on
+synchronous_commit = off
 
 # Checkpointing:
-checkpoint_timeout = '15 min'
+checkpoint_timeout = '30 min'
 checkpoint_completion_target = 0.9
-max_wal_size = '1024 MB'
-min_wal_size = '512 MB'
-
-# WAL writing
-wal_compression = on
-wal_buffers = -1 # auto-tuned by Postgres till maximum of segment size (16MB by default)
-wal_writer_delay = 200ms
-wal_writer_flush_after = 1MB
-
-# Parallel queries:
-max_worker_processes = 8
-max_parallel_workers_per_gather = 4
-max_parallel_maintenance_workers = 4
-max_parallel_workers = 8
-parallel_leader_participation = on
+max_wal_size = '8 GB'
+min_wal_size = '2 GB'
 
 ```
 ## Сравнение
