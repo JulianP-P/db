@@ -183,13 +183,13 @@ select name, setting, unit, sourcefile from pg_settings where name in ('checkpoi
 ```
 При применении следующих настроек производительность практически не изменилась.
 
-|Настройки                   |По умолчанию|Pgconfigurator|PgTune|Старое значение |Комментарии|
-|:---------------------------|:-----------|:-------------|:------|-----|
-|checkpoint_timeout          |5 min       |15 min        | 5 min | Параметр, который устанавливает максимальное время между автоматическими контрольными точками в WAL |
-|checkpoint_completion_target|0.9         |0.9           | 0.9 | Чтобы избежать «заваливания» системы ввода/вывода при резкой интенсивной записи страниц, запись «грязных» буферов во время контрольной точки растягивается на определённый период времени. Этот период управляется параметром checkpoint_completion_target, который задаётся как часть интервала между контрольными точками.  Со значением 0.9, заданным по умолчанию, можно ожидать, что PostgreSQL завершит процедуру контрольной точки незадолго до следующей запланированной (примерно на 90% выполнения предыдущей контрольной точки).|
-|max_wal_size                |1024 MB     |1024 MB       | 1024 MB | - |
-|min_wal_size                |80 MB       |512 MB        | 80 MB | - |
-|tps                         |2338        |              |
+|Настройки                   |По умолчанию|Pgconfigurator|PgTune |Комментарии|
+|:---------------------------|:-----------|:-------------|:------|:----|
+|checkpoint_timeout          |5 min       |15 min        |-      |Параметр, который устанавливает максимальное время между автоматическими контрольными точками в WAL |
+|checkpoint_completion_target|0.9         |0.9           |0.9    |Чтобы избежать «заваливания» системы ввода/вывода при резкой интенсивной записи страниц, запись «грязных» буферов во время контрольной точки растягивается на определённый период времени. Этот период управляется параметром checkpoint_completion_target, который задаётся как часть интервала между контрольными точками.  Со значением 0.9, заданным по умолчанию, можно ожидать, что PostgreSQL завершит процедуру контрольной точки незадолго до следующей запланированной (примерно на 90% выполнения предыдущей контрольной точки).|
+|max_wal_size                |1024 MB     |1024 MB       |8 GB   | - |
+|min_wal_size                |80 MB       |512 MB        |2 GB   | - |
+|tps                         |2338        |2337          |2332   | - |
 
 ### 5) WAL writing
 ```sql
@@ -202,21 +202,6 @@ select name, setting, unit, sourcefile from pg_settings where name in ('wal_comp
 |wal_compression | on | off |
 |wal_buffers | -1 | 4 MB |
 
-```
-transaction type: <builtin: TPC-B (sort of)>
-scaling factor: 1
-query mode: simple
-number of clients: 50
-number of threads: 2
-maximum number of tries: 1
-duration: 300 s
-number of transactions actually processed: 701818
-number of failed transactions: 0 (0.000%)
-latency average = 21.370 ms
-latency stddev = 24.492 ms
-initial connection time = 42.333 ms
-tps = 2339.531194 (without initial connection time)
-```
 
 ### 6) Background writer
 ```sql
@@ -232,21 +217,6 @@ select name, setting, unit, sourcefile from pg_settings where name in ('bgwriter
 |bgwriter_lru_multiplier | 2.0 | 2.0 | Число загрязнённых буферов, записываемых в очередном раунде, зависит от того, сколько новых буферов требовалось серверным процессам в предыдущих раундах. Средняя недавняя потребность умножается на bgwriter_lru_multiplier и предполагается, что именно столько буферов потребуется на следующем раунде. |
 |bgwriter_flush_after | 0 | 512 kb | Если объём всех записанных «грязных» страниц превысит заданное этим параметром значение, то Background Writer заставит ОС записать данные из своего кэша непосредственно на диск. |
 
-```
-transaction type: <builtin: TPC-B (sort of)>
-scaling factor: 1
-query mode: simple
-number of clients: 50
-number of threads: 2
-maximum number of tries: 1
-duration: 300 s
-number of transactions actually processed: 700070
-number of failed transactions: 0 (0.000%)
-latency average = 21.424 ms
-latency stddev = 24.676 ms
-initial connection time = 44.246 ms
-tps = 2333.728822 (without initial connection time)
-```
 
 ### 7) Parallel queries
 ```sql
@@ -261,19 +231,5 @@ select name, setting, unit, sourcefile from pg_settings where name in ('max_work
 |max_parallel_workers | 1 | 8 | - |
 |parallel_leader_participation | on | on |определяет, будет ли ведущий процесс участвовать в параллельном выполнении запроса|
 
-```
-transaction type: <builtin: TPC-B (sort of)>
-scaling factor: 1
-query mode: simple
-number of clients: 50
-number of threads: 2
-maximum number of tries: 1
-duration: 300 s
-number of transactions actually processed: 700750
-number of failed transactions: 0 (0.000%)
-latency average = 21.403 ms
-latency stddev = 24.287 ms
-initial connection time = 44.512 ms
-tps = 2335.972923 (without initial connection time)
-```
+
 **Наибольшее значение на производительность оказал параметр synchronous_commit.**
