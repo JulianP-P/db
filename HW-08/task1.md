@@ -89,22 +89,27 @@ parallel_leader_participation = on
 # Data Storage: ssd
 
 max_connections = 60
+
 shared_buffers = 4GB
-effective_cache_size = 12GB
-maintenance_work_mem = 1GB
-checkpoint_completion_target = 0.9
-wal_buffers = 16MB
-default_statistics_target = 100
-random_page_cost = 1.1
-effective_io_concurrency = 200
 work_mem = 17476kB
+maintenance_work_mem = 1GB
 huge_pages = off
+effective_cache_size = 12GB
+effective_io_concurrency = 200
+random_page_cost = 1.1
+
+checkpoint_completion_target = 0.9
 min_wal_size = 2GB
 max_wal_size = 8GB
+
+wal_buffers = 16MB
+
 max_worker_processes = 8
 max_parallel_workers_per_gather = 4
 max_parallel_workers = 8
 max_parallel_maintenance_workers = 4
+
+default_statistics_target = 100
 ```
 ### Собственный конфиг
 ```
@@ -155,7 +160,7 @@ PgTune не предложил никаких настроек для этого
 |shared_preload_libraries |-           |'pg_stat_statements'|В этом параметре задаются библиотеки, которые будут загружаться при запуске сервера. |
 |track_io_timing          |of          |on                  |Включает мониторинг времени чтения и записи блоков. |
 |track_functions          |none        |pl                  |Включает подсчёт вызовов функций и времени их выполнения. Значение pl включает отслеживание только функций на процедурном языке, а all — также функций на языках SQL и C. |
-|tps                      |            |2318              | |
+|tps                      |2338        |2318              | |
 
 ### 3) Replication
 ```sql
@@ -168,41 +173,9 @@ select name, setting, unit, sourcefile from pg_settings where name in ('wal_leve
 |wal_level         |replica     |replica       |minimal        |Параметр определяет, как много информации записывается в WAL. Возможные значения replica, minimal, logical. Со значением replica в журнал записываются данные, необходимые для поддержки архивирования WAL и репликации, включая запросы только на чтение на ведомом сервере. |
 |max_wal_senders   |10          |0             |0              |Задаёт максимально допустимое число одновременных подключений ведомых серверов или клиентов потокового копирования. |
 |synchronous_commit|on          |off           |off            |Параметр, который определяет, когда транзакции считаются зафиксированными и в какой момент клиент получает подтверждение об этом. Транзакции считаются зафиксированными только после того, как записи WAL будут записаны на диск.  Транзакции считаются зафиксированными сразу после записи в журнал WAL, без ожидания записи на диск. Другие возможные значения: remote_write, local, remote_apply |
-|tps               |            |7436 |7422  | |
-
-```
-transaction type: <builtin: TPC-B (sort of)>
-scaling factor: 1
-query mode: simple
-number of clients: 50
-number of threads: 2
-maximum number of tries: 1
-duration: 300 s
-number of transactions actually processed: 1927988
-number of failed transactions: 0 (0.000%)
-latency average = 7.778 ms
-latency stddev = 10.661 ms
-initial connection time = 61.670 ms
-tps = 6427.607412 (without initial connection time)
-```
+|tps               |2338        |7436          |7422           | |
 
 **Наибольший вклад внесла метрика synchronous_commit.**
-Тест, где все настройки, кроме synchronous_commit, старые.
-```
-transaction type: <builtin: TPC-B (sort of)>
-scaling factor: 1
-query mode: simple
-number of clients: 50
-number of threads: 2
-maximum number of tries: 1
-duration: 300 s
-number of transactions actually processed: 1955794
-number of failed transactions: 0 (0.000%)
-latency average = 7.667 ms
-latency stddev = 10.567 ms
-initial connection time = 62.401 ms
-tps = 6520.263292 (without initial connection time)
-```
 
 ### 4) Checkpointing
 ```sql
@@ -210,27 +183,13 @@ select name, setting, unit, sourcefile from pg_settings where name in ('checkpoi
 ```
 При применении следующих настроек производительность практически не изменилась.
 
-|Настройки|Новое значение|Старое значение |Комментарии|
-|---------|--------------|----------------|-----------|
-|checkpoint_timeout | 15 min | 5 min | Параметр, который устанавливает максимальное время между автоматическими контрольными точками в WAL |
-|checkpoint_completion_target | 0.9 | 0.9 | Чтобы избежать «заваливания» системы ввода/вывода при резкой интенсивной записи страниц, запись «грязных» буферов во время контрольной точки растягивается на определённый период времени. Этот период управляется параметром checkpoint_completion_target, который задаётся как часть интервала между контрольными точками.  Со значением 0.9, заданным по умолчанию, можно ожидать, что PostgreSQL завершит процедуру контрольной точки незадолго до следующей запланированной (примерно на 90% выполнения предыдущей контрольной точки).|
-|max_wal_size | 1024 MB | 1024 MB | - |
-|min_wal_size | 512 MB | 80 MB | - |
-
-```
-scaling factor: 1
-query mode: simple
-number of clients: 50
-number of threads: 2
-maximum number of tries: 1
-duration: 300 s
-number of transactions actually processed: 567613
-number of failed transactions: 0 (0.000%)
-latency average = 26.421 ms
-latency stddev = 35.287 ms
-initial connection time = 59.801 ms
-tps = 1892.268002 (without initial connection time)
-```
+|Настройки                   |По умолчанию|Pgconfigurator|PgTune|Старое значение |Комментарии|
+|:---------------------------|:-----------|:-------------|:------|-----|
+|checkpoint_timeout          |5 min       |15 min        | 5 min | Параметр, который устанавливает максимальное время между автоматическими контрольными точками в WAL |
+|checkpoint_completion_target|0.9         |0.9           | 0.9 | Чтобы избежать «заваливания» системы ввода/вывода при резкой интенсивной записи страниц, запись «грязных» буферов во время контрольной точки растягивается на определённый период времени. Этот период управляется параметром checkpoint_completion_target, который задаётся как часть интервала между контрольными точками.  Со значением 0.9, заданным по умолчанию, можно ожидать, что PostgreSQL завершит процедуру контрольной точки незадолго до следующей запланированной (примерно на 90% выполнения предыдущей контрольной точки).|
+|max_wal_size                |1024 MB     |1024 MB       | 1024 MB | - |
+|min_wal_size                |80 MB       |512 MB        | 80 MB | - |
+|tps                         |2338        |              |
 
 ### 5) WAL writing
 ```sql
