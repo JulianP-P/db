@@ -63,13 +63,6 @@ min_wal_size = '512 MB'
 wal_compression = on
 wal_buffers = -1 # auto-tuned by Postgres till maximum of segment size (16MB by default)
 
-
-# Background writer
-bgwriter_delay = 200ms
-bgwriter_lru_maxpages = 100
-bgwriter_lru_multiplier = 2.0
-bgwriter_flush_after = 0
-
 # Parallel queries:
 max_worker_processes = 8
 max_parallel_workers_per_gather = 4
@@ -181,6 +174,7 @@ select name, setting, unit, sourcefile from pg_settings where name in ('wal_leve
 ```sql
 select name, setting, unit, sourcefile from pg_settings where name in ('checkpoint_timeout', 'checkpoint_completion_target', 'max_wal_size', 'min_wal_size');
 ```
+Мое мнение совпадает с Pgconfigurator
 При применении следующих настроек производительность практически не изменилась.
 
 |Настройки                   |По умолчанию|Pgconfigurator|PgTune |Комментарии|
@@ -197,39 +191,23 @@ select name, setting, unit, sourcefile from pg_settings where name in ('wal_comp
 ```
 При применении следующих настроек производительность немного повысилась.
 
-|Настройки|Новое значение|Старое значение |Комментарии|
-|---------|--------------|----------------|-----------|
-|wal_compression | on | off |
-|wal_buffers | -1 | 4 MB |
+|Настройки      |По умолчанию|Pgconfigurator|PgTune|Комментарии|
+|:--------      |:-----------|:-------------|:-----|:----------|
+|wal_compression|off         |on            |-     ||
+|wal_buffers    |4 MB        |-1            |16 MB ||
+|tps            |2338        |2335          |2326  ||
 
-
-### 6) Background writer
-```sql
-select name, setting, unit, sourcefile from pg_settings where name in ('bgwriter_delay', 'bgwriter_lru_maxpages', 'bgwriter_lru_multiplier', 'bgwriter_flush_after');
-```
-
-При применении следующих настроек производительность немного повысилась.
-
-|Настройки|Новое значение|Старое значение |Комментарии|
-|---------|--------------|----------------|-----------|
-|bgwriter_delay | 200ms | 200ms | В числе специальных процессов сервера есть процесс фоновой записи, задача которого — осуществлять запись «грязных» (новых или изменённых) общих буферов на диск. Задаёт задержку между раундами активности процесса фоновой записи. Во время раунда этот процесс осуществляет запись некоторого количества загрязнённых буферов (это настраивается следующими параметрами). Затем он засыпает на время bgwriter_delay, и всё повторяется снова. | 
-|bgwriter_lru_maxpages | 100 | 100 | Задаёт максимальное число буферов, которое сможет записать процесс фоновой записи за раунд активности.|
-|bgwriter_lru_multiplier | 2.0 | 2.0 | Число загрязнённых буферов, записываемых в очередном раунде, зависит от того, сколько новых буферов требовалось серверным процессам в предыдущих раундах. Средняя недавняя потребность умножается на bgwriter_lru_multiplier и предполагается, что именно столько буферов потребуется на следующем раунде. |
-|bgwriter_flush_after | 0 | 512 kb | Если объём всех записанных «грязных» страниц превысит заданное этим параметром значение, то Background Writer заставит ОС записать данные из своего кэша непосредственно на диск. |
-
-
-### 7) Parallel queries
+### 6) Parallel queries
 ```sql
 select name, setting, unit, sourcefile from pg_settings where name in ('max_worker_processes', 'max_parallel_workers_per_gather', 'max_parallel_maintenance_workers', 'max_parallel_workers', 'parallel_leader_participation');
 ```
-
-|Настройки|Новое значение|Старое значение |Комментарии|
-|---------|--------------|----------------|-----------|
-|max_worker_processes | 1 | 8 | Максимальное число фоновых процессов, которое можно запустить в текущей системе. |
-|max_parallel_workers_per_gather | 1 | 4 | Задаёт максимальное число рабочих процессов, которые могут запускаться одним узлом Gather или Gather Merge. Параллельные рабочие процессы берутся из пула процессов, контролируемого параметром max_worker_processes, в количестве, ограничиваемом значением max_parallel_workers. |
-|max_parallel_maintenance_workers | 1 | 4 | Задаёт максимальное число рабочих процессов, которые могут запускаться одной служебной командой. В настоящее время параллельные процессы может использовать только CREATE INDEX при построении индекса-B-дерева и VACUUM без указания FULL. |
-|max_parallel_workers | 1 | 8 | - |
-|parallel_leader_participation | on | on |определяет, будет ли ведущий процесс участвовать в параллельном выполнении запроса|
+Pgconfigurator и PgTune совпадают.
+|Настройки                       |По умолчанию|Pgconfigurator и PgTune|Комментарии|
+|:-------------------------------|:-----------|:-------------|:-----|
+|max_worker_processes            |8           |8             |Максимальное число фоновых процессов, которое можно запустить в текущей системе. |
+|max_parallel_workers_per_gather |2           |4             |Задаёт максимальное число рабочих процессов, которые могут запускаться одним узлом Gather или Gather Merge. Параллельные рабочие процессы берутся из пула процессов, контролируемого параметром max_worker_processes, в количестве, ограничиваемом значением max_parallel_workers. |
+|max_parallel_maintenance_workers|2           |4             |Задаёт максимальное число рабочих процессов, которые могут запускаться одной служебной командой. В настоящее время параллельные процессы может использовать только CREATE INDEX при построении индекса-B-дерева и VACUUM без указания FULL. |
+|max_parallel_workers            |8           |8             |- |
 
 
 **Наибольшее значение на производительность оказал параметр synchronous_commit.**
