@@ -15,7 +15,7 @@ pgbench -c 50 -j 2 -P 10 -T 300 -U postgres postgres
 # DB Type: oltp
 # Total Memory (RAM): 16 GB
 # CPUs num: 8
-# Connections num: 60
+# Connections num: 100
 # Data Storage: ssd
 Number of disks: 1
 How big is your database?: 1 GB
@@ -30,7 +30,7 @@ Are you willing to try out experimental features for better performance?: No
 Конфигурационный файл, который предложил [Pgconfigurator](https://pgconfigurator.cybertec.at/)
 ```
 # Connectivity
-max_connections = 60
+max_connections = 100
 superuser_reserved_connections = 3
 
 # Memory Settings
@@ -58,7 +58,6 @@ checkpoint_completion_target = 0.9
 max_wal_size = '1024 MB'
 min_wal_size = '512 MB'
 
-
 # WAL writing
 wal_compression = on
 wal_buffers = -1 # auto-tuned by Postgres till maximum of segment size (16MB by default)
@@ -81,7 +80,7 @@ parallel_leader_participation = on
 # Connections num: 60
 # Data Storage: ssd
 
-max_connections = 60
+max_connections = 100
 
 shared_buffers = 4GB
 work_mem = 17476kB
@@ -108,7 +107,7 @@ default_statistics_target = 100
 ```
 # Memory Settings
 shared_buffers = '4 GB'
-work_mem = '70 MB'
+work_mem = '41 MB'
 maintenance_work_mem = '320 MB'
 huge_pages = off
 effective_cache_size = '11 GB'
@@ -133,13 +132,13 @@ select name, setting, unit, sourcefile from pg_settings where name in ('shared_b
 |Настройки                |По умолчанию|Pgconfigurator|PgTune  |Мое предложение|Комментарии|
 |:------------------------|:-----------|:-------------|:-------|:--------------|-----------|
 |shared_buffers           |128 MB      |1024 MB       |4 GB    |4 GB           | Буфер для разделяемой памяти рекомендуется брать в 25% от ОЗУ |
-|work_mem                 |4 MB        |32 MB         |17476 kB|70 MB          | Память, которая будет используется при обработке запросов. Выделяется для каждого процесса. Значение посчитано по формуле Total RAM * 0,25 / max_connections. |
+|work_mem                 |4 MB        |32 MB         |17476 kB|41 MB          | Память, которая будет используется при обработке запросов. Выделяется для каждого процесса. Значение посчитано по формуле Total RAM * 0,25 / max_connections. |
 |maintenance_work_mem     |64 MB       |320 MB        |1 GB    |1 GB           | Максимальный объём памяти для операций VACUUM, CREATE INDEX и ALTER TABLE ADD FOREIGN KEY |
 |huge_pages               |try         |off           |off     |off            | Запрашивание огромных таблиц из общей памяти отключено. В докере для использования этой функции необходимо провести доп исследования для использования данного функционала.|
 |effective_cache_size     |4 GB        |11 GB         |12 GB   |12 GB          | Оценка памяти, доступной для кэширования диска, рекомендуется брать в 50-75% от ОЗУ |
 |effective_io_concurrency |1           |100           |200     |200            | Число одновременных операций ввода-вывода. Параметр зависит от типа диска. При SSD стоит выбирать значения в несколько сотен|
 |random_page_cost         |4           |1.25          |1.1     |1              | Стоимость чтения одной произвольной страницы с диска. Параметр зависит от типа диска. При SSD стоит выбирать значения ближе к 1|
-|**tps**                  |2338        |2337          |2334    |2339       | - |
+|**tps**                  |2338        |2337          |2334    |2339           | - |
 
 ### 2) Monitoring
 ```sql
@@ -153,7 +152,7 @@ PgTune не предложил никаких настроек для этого
 |shared_preload_libraries |-           |'pg_stat_statements'|В этом параметре задаются библиотеки, которые будут загружаться при запуске сервера. |
 |track_io_timing          |of          |on                  |Включает мониторинг времени чтения и записи блоков. |
 |track_functions          |none        |pl                  |Включает подсчёт вызовов функций и времени их выполнения. Значение pl включает отслеживание только функций на процедурном языке, а all — также функций на языках SQL и C. |
-|tps                      |2338        |2318              | |
+|**tps**                  |2338        |2318                | |
 
 ### 3) Replication
 ```sql
@@ -166,7 +165,7 @@ select name, setting, unit, sourcefile from pg_settings where name in ('wal_leve
 |wal_level         |replica     |replica       |minimal        |Параметр определяет, как много информации записывается в WAL. Возможные значения replica, minimal, logical. Со значением replica в журнал записываются данные, необходимые для поддержки архивирования WAL и репликации, включая запросы только на чтение на ведомом сервере. |
 |max_wal_senders   |10          |0             |0              |Задаёт максимально допустимое число одновременных подключений ведомых серверов или клиентов потокового копирования. |
 |synchronous_commit|on          |off           |off            |Параметр, который определяет, когда транзакции считаются зафиксированными и в какой момент клиент получает подтверждение об этом. Транзакции считаются зафиксированными только после того, как записи WAL будут записаны на диск.  Транзакции считаются зафиксированными сразу после записи в журнал WAL, без ожидания записи на диск. Другие возможные значения: remote_write, local, remote_apply |
-|tps               |2338        |7436          |7422           | |
+|**tps**           |2338        |7436          |7422           | |
 
 **Наибольший вклад внесла метрика synchronous_commit.**
 
@@ -183,7 +182,7 @@ select name, setting, unit, sourcefile from pg_settings where name in ('checkpoi
 |checkpoint_completion_target|0.9         |0.9           |0.9    |Чтобы избежать «заваливания» системы ввода/вывода при резкой интенсивной записи страниц, запись «грязных» буферов во время контрольной точки растягивается на определённый период времени. Этот период управляется параметром checkpoint_completion_target, который задаётся как часть интервала между контрольными точками.  Со значением 0.9, заданным по умолчанию, можно ожидать, что PostgreSQL завершит процедуру контрольной точки незадолго до следующей запланированной (примерно на 90% выполнения предыдущей контрольной точки).|
 |max_wal_size                |1024 MB     |1024 MB       |8 GB   | - |
 |min_wal_size                |80 MB       |512 MB        |2 GB   | - |
-|tps                         |2338        |2337          |2332   | - |
+|**tps**                     |2338        |2337          |2332   | - |
 
 ### 5) WAL writing
 ```sql
@@ -195,7 +194,7 @@ select name, setting, unit, sourcefile from pg_settings where name in ('wal_comp
 |:--------      |:-----------|:-------------|:-----|:----------|
 |wal_compression|off         |on            |-     ||
 |wal_buffers    |4 MB        |-1            |16 MB ||
-|tps            |2338        |2335          |2326  ||
+|**tps**        |2338        |2335          |2326  ||
 
 ### 6) Parallel queries
 ```sql
@@ -208,6 +207,7 @@ Pgconfigurator и PgTune совпадают.
 |max_parallel_workers_per_gather |2           |4             |Задаёт максимальное число рабочих процессов, которые могут запускаться одним узлом Gather или Gather Merge. Параллельные рабочие процессы берутся из пула процессов, контролируемого параметром max_worker_processes, в количестве, ограничиваемом значением max_parallel_workers. |
 |max_parallel_maintenance_workers|2           |4             |Задаёт максимальное число рабочих процессов, которые могут запускаться одной служебной командой. В настоящее время параллельные процессы может использовать только CREATE INDEX при построении индекса-B-дерева и VACUUM без указания FULL. |
 |max_parallel_workers            |8           |8             |- |
+|**tps**                          |2338        |2337         ||
 
 
 **Наибольшее значение на производительность оказал параметр synchronous_commit.**
