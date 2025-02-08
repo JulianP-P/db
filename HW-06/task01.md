@@ -72,7 +72,32 @@ FROM pg_locks where pid in (70, 73, 309) order by pid;
  relation      | 24680    |         |          | RowExclusiveLock | t       | 309
 (15 rows)
 ```
+|   locktype    | relation | virtxid |   xid    |       mode       | granted | pid |
+|---------------|----------|---------|----------|------------------|---------|-----|
+| relation      | 24680    |         |          | RowExclusiveLock | t       |  70| 
+| transactionid |          |         | 75017289 | ExclusiveLock    | t       |  70|
+| relation      | 24675    |         |          | RowExclusiveLock | t       |  70|
+| virtualxid    |          | 5/15    |          | ExclusiveLock    | t       |  70|
 
+pid = 70 - первая сессия, где выполнен update
+```
+|   locktype    | relation | virtxid |   xid    |       mode       | granted | pid |
+|---------------|----------|---------|----------|------------------|---------|-----|
+| virtualxid    |          | 4/32    |          | ExclusiveLock    | t       |  73|
+| transactionid |          |         | 75017290 | ExclusiveLock    | t       |  73|
+| relation      | 24680    |         |          | RowExclusiveLock | t       |  73|
+| tuple         | 24675    |         |          | ExclusiveLock    | t       |  73|
+| transactionid |          |         | 75017289 | ShareLock        | f       |  73|
+| relation      | 24675    |         |          | RowExclusiveLock | t       |  73|
+
+```
+|   locktype    | relation | virtxid |   xid    |       mode       | granted | pid |
+|---------------|----------|---------|----------|------------------|---------|-----|
+| transactionid |          |         | 75017291 | ExclusiveLock    | t       | 309|
+| relation      | 24675    |         |          | RowExclusiveLock | t       | 309|
+| virtualxid    |          | 6/3     |          | ExclusiveLock    | t       | 309|
+| tuple         | 24675    |         |          | ExclusiveLock    | f       | 309|
+| relation      | 24680    |         |          | RowExclusiveLock | t       | 309|
 
 ### Задание 3
 Воспроизведите взаимоблокировку трех транзакций. Можно ли разобраться в ситуации постфактум, изучая журнал сообщений?
