@@ -39,7 +39,39 @@ commit;
 ### Задание 2
 Смоделируйте ситуацию обновления одной и той же строки тремя командами UPDATE в разных сеансах. Изучите возникшие блокировки в представлении pg_locks и убедитесь, что все они понятны. Пришлите список блокировок и объясните, что значит каждая.
 
+```sql
+BEGIN;
+SELECT pg_backend_pid();
+BEGIN
+ pg_backend_pid 
+----------------
+             70
+(1 row)
 
+locks=*# UPDATE accounts SET amount = amount + 100 WHERE acc_no = 1;
+```
+```sql
+postgres=# SELECT locktype, relation::REGCLASS, virtualxid AS virtxid, transactionid AS xid, mode, granted, pid
+FROM pg_locks where pid in (70, 73, 309) order by pid;
+   locktype    | relation | virtxid |   xid    |       mode       | granted | pid 
+---------------+----------+---------+----------+------------------+---------+-----
+ relation      | 24680    |         |          | RowExclusiveLock | t       |  70
+ transactionid |          |         | 75017289 | ExclusiveLock    | t       |  70
+ relation      | 24675    |         |          | RowExclusiveLock | t       |  70
+ virtualxid    |          | 5/15    |          | ExclusiveLock    | t       |  70
+ virtualxid    |          | 4/32    |          | ExclusiveLock    | t       |  73
+ transactionid |          |         | 75017290 | ExclusiveLock    | t       |  73
+ relation      | 24680    |         |          | RowExclusiveLock | t       |  73
+ tuple         | 24675    |         |          | ExclusiveLock    | t       |  73
+ transactionid |          |         | 75017289 | ShareLock        | f       |  73
+ relation      | 24675    |         |          | RowExclusiveLock | t       |  73
+ transactionid |          |         | 75017291 | ExclusiveLock    | t       | 309
+ relation      | 24675    |         |          | RowExclusiveLock | t       | 309
+ virtualxid    |          | 6/3     |          | ExclusiveLock    | t       | 309
+ tuple         | 24675    |         |          | ExclusiveLock    | f       | 309
+ relation      | 24680    |         |          | RowExclusiveLock | t       | 309
+(15 rows)
+```
 
 
 ### Задание 3
