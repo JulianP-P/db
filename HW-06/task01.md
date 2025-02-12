@@ -65,7 +65,7 @@ FROM pg_locks order by pid;
  relation      | accounts      |         |     | RowExclusiveLock | t       | 168
  relation      | accounts_pkey |         |     | RowExclusiveLock | t       | 168
 ```
-
+Ниже рассмотрены блокировки, относящиеся к каждой отдельной транзакции.
 ```
    locktype    |   relation    | virtxid | xid |       mode       | granted | pid 
 ---------------+---------------+---------+-----+------------------+---------+-----
