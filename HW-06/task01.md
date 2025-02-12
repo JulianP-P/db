@@ -51,53 +51,57 @@ BEGIN
 locks=*# UPDATE accounts SET amount = amount + 100 WHERE acc_no = 1;
 ```
 ```sql
-postgres=# SELECT locktype, relation::REGCLASS, virtualxid AS virtxid, transactionid AS xid, mode, granted, pid
-FROM pg_locks where pid in (70, 73, 309) order by pid;
-   locktype    | relation | virtxid |   xid    |       mode       | granted | pid 
----------------+----------+---------+----------+------------------+---------+-----
- relation      | 24680    |         |          | RowExclusiveLock | t       |  70
- transactionid |          |         | 75017289 | ExclusiveLock    | t       |  70
- relation      | 24675    |         |          | RowExclusiveLock | t       |  70
- virtualxid    |          | 5/15    |          | ExclusiveLock    | t       |  70
- virtualxid    |          | 4/32    |          | ExclusiveLock    | t       |  73
- transactionid |          |         | 75017290 | ExclusiveLock    | t       |  73
- relation      | 24680    |         |          | RowExclusiveLock | t       |  73
- tuple         | 24675    |         |          | ExclusiveLock    | t       |  73
- transactionid |          |         | 75017289 | ShareLock        | f       |  73
- relation      | 24675    |         |          | RowExclusiveLock | t       |  73
- transactionid |          |         | 75017291 | ExclusiveLock    | t       | 309
- relation      | 24675    |         |          | RowExclusiveLock | t       | 309
- virtualxid    |          | 6/3     |          | ExclusiveLock    | t       | 309
- tuple         | 24675    |         |          | ExclusiveLock    | f       | 309
- relation      | 24680    |         |          | RowExclusiveLock | t       | 309
-(15 rows)
+locks=# SELECT locktype, relation::REGCLASS, virtualxid AS virtxid, transactionid AS xid, mode, granted, pid
+FROM pg_locks order by pid;
+   locktype    |   relation    | virtxid | xid |       mode       | granted | pid 
+---------------+---------------+---------+-----+------------------+---------+-----
+ relation      | accounts_pkey |         |     | RowExclusiveLock | t       |  40
+ transactionid |               |         | 741 | ExclusiveLock    | t       |  40
+ virtualxid    |               | 3/13    |     | ExclusiveLock    | t       |  40
+ relation      | accounts      |         |     | RowExclusiveLock | t       |  40
+ transactionid |               |         | 742 | ExclusiveLock    | t       | 148
+ relation      | accounts_pkey |         |     | RowExclusiveLock | t       | 148
+ relation      | accounts      |         |     | RowExclusiveLock | t       | 148
+ virtualxid    |               | 4/223   |     | ExclusiveLock    | t       | 148
+ tuple         | accounts      |         |     | ExclusiveLock    | t       | 148
+ transactionid |               |         | 741 | ShareLock        | f       | 148
+ transactionid |               |         | 743 | ExclusiveLock    | t       | 168
+ tuple         | accounts      |         |     | ExclusiveLock    | f       | 168
+ virtualxid    |               | 5/41    |     | ExclusiveLock    | t       | 168
+ relation      | accounts      |         |     | RowExclusiveLock | t       | 168
+ relation      | accounts_pkey |         |     | RowExclusiveLock | t       | 168
 ```
-|   locktype    | relation | virtxid |   xid    |       mode       | granted | pid |
-|---------------|----------|---------|----------|------------------|---------|-----|
-| relation      | 24680    |         |          | RowExclusiveLock | t       |  70| 
-| transactionid |          |         | 75017289 | ExclusiveLock    | t       |  70|
-| relation      | 24675    |         |          | RowExclusiveLock | t       |  70|
-| virtualxid    |          | 5/15    |          | ExclusiveLock    | t       |  70|
-
-pid = 70 - первая сессия, где выполнен update
-```
-|   locktype    | relation | virtxid |   xid    |       mode       | granted | pid |
-|---------------|----------|---------|----------|------------------|---------|-----|
-| virtualxid    |          | 4/32    |          | ExclusiveLock    | t       |  73|
-| transactionid |          |         | 75017290 | ExclusiveLock    | t       |  73|
-| relation      | 24680    |         |          | RowExclusiveLock | t       |  73|
-| tuple         | 24675    |         |          | ExclusiveLock    | t       |  73|
-| transactionid |          |         | 75017289 | ShareLock        | f       |  73|
-| relation      | 24675    |         |          | RowExclusiveLock | t       |  73|
 
 ```
-|   locktype    | relation | virtxid |   xid    |       mode       | granted | pid |
-|---------------|----------|---------|----------|------------------|---------|-----|
-| transactionid |          |         | 75017291 | ExclusiveLock    | t       | 309|
-| relation      | 24675    |         |          | RowExclusiveLock | t       | 309|
-| virtualxid    |          | 6/3     |          | ExclusiveLock    | t       | 309|
-| tuple         | 24675    |         |          | ExclusiveLock    | f       | 309|
-| relation      | 24680    |         |          | RowExclusiveLock | t       | 309|
+   locktype    |   relation    | virtxid | xid |       mode       | granted | pid 
+---------------+---------------+---------+-----+------------------+---------+-----
+ relation      | accounts_pkey |         |     | RowExclusiveLock | t       |  40
+ transactionid |               |         | 741 | ExclusiveLock    | t       |  40
+ virtualxid    |               | 3/13    |     | ExclusiveLock    | t       |  40
+ relation      | accounts      |         |     | RowExclusiveLock | t       |  40
+```
+pid = 40 - первая сессия, где выполнен update.
+- Блокировка ExclusiveLock типа transactionid - блокировка настоящего номера транзакции, который появляется, как только транзакция начинает менять данные.
+- Блокировка ExclusiveLock типа virtualxid - блокировка виртуального номера транзакции, котораый есть у любой транзакции.
+- Блокировка RowExclusiveLock в relation accounts_pkey - блокировка индекса для первичного ключа, которая возникает при команде UPDATE.
+- Блокировка RowExclusiveLock в relation accounts - блокировка таблицы accounts, которая возникает при команде UPDATE.
+Все блокировки были получены (granted=t), так как этот UPDATE выполнялся первым, других блокировк не было.
+```
+   locktype    |   relation    | virtxid | xid |       mode       | granted | pid 
+---------------+---------------+---------+-----+------------------+---------+-----
+ transactionid |               |         | 742 | ExclusiveLock    | t       | 148
+ relation      | accounts_pkey |         |     | RowExclusiveLock | t       | 148
+ relation      | accounts      |         |     | RowExclusiveLock | t       | 148
+ virtualxid    |               | 4/223   |     | ExclusiveLock    | t       | 148
+ tuple         | accounts      |         |     | ExclusiveLock    | t       | 148
+ transactionid |               |         | 741 | ShareLock        | f       | 148
+```
+pid = 148 - вторая сессия, где выполнен update.
+- Блокировка ExclusiveLock типа transactionid - блокировка настоящего номера транзакции, который появляется, как только транзакция начинает менять данные.
+- Блокировка ExclusiveLock типа virtualxid - блокировка виртуального номера транзакции, котораый есть у любой транзакции.
+- Блокировка RowExclusiveLock в relation accounts_pkey - блокировка индекса для первичного ключа, которая возникает при команде UPDATE.
+- Блокировка RowExclusiveLock в relation accounts - блокировка таблицы accounts, которая возникает при команде UPDATE.
+Все блокировки были получены (granted=t), так как этот UPDATE выполнялся первым, других блокировк не было.
 
 ### Задание 3
 Воспроизведите взаимоблокировку трех транзакций. Можно ли разобраться в ситуации постфактум, изучая журнал сообщений?
