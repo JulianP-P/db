@@ -38,17 +38,11 @@ commit;
 ```
 ### Задание 2
 Смоделируйте ситуацию обновления одной и той же строки тремя командами UPDATE в разных сеансах. Изучите возникшие блокировки в представлении pg_locks и убедитесь, что все они понятны. Пришлите список блокировок и объясните, что значит каждая.
-
+Используемый запрос во всех трех сеансах:
 ```sql
 BEGIN;
 SELECT pg_backend_pid();
-BEGIN
- pg_backend_pid 
-----------------
-             70
-(1 row)
-
-locks=*# UPDATE accounts SET amount = amount + 100 WHERE acc_no = 1;
+UPDATE accounts SET amount = amount + 100 WHERE acc_no = 1;
 ```
 ```sql
 locks=# SELECT locktype, relation::REGCLASS, virtualxid AS virtxid, transactionid AS xid, mode, granted, pid
@@ -118,6 +112,62 @@ pid = 148 - вторая сессия, где выполнен update.
 ### Задание 3
 Воспроизведите взаимоблокировку трех транзакций. Можно ли разобраться в ситуации постфактум, изучая журнал сообщений?
 
+Используемые запросы:
+```sql
+-- 1
+BEGIN;
+SELECT txid_current(), pg_backend_pid();
+UPDATE accounts SET amount = amount - 100.00 WHERE acc_no = 1;
+--
+UPDATE accounts SET amount = amount + 100.00 WHERE acc_no = 2;
 
+--2
+BEGIN;
+SELECT txid_current(), pg_backend_pid();
+UPDATE accounts SET amount = amount - 100.00 WHERE acc_no = 2;
+--
+UPDATE accounts SET amount = amount + 100.00 WHERE acc_no = 3;
+
+--3
+BEGIN;
+SELECT txid_current(), pg_backend_pid();
+UPDATE accounts SET amount = amount - 100.00 WHERE acc_no = 3;
+--
+UPDATE accounts SET amount = amount + 100.00 WHERE acc_no = 1;
+```
+Логи:
+```
+2025-02-12 12:28:29.429 UTC [35] LOG:  process 35 still waiting for ShareLock on transaction 772 after 1000.055 ms
+2025-02-12 12:28:29.429 UTC [35] DETAIL:  Process holding the lock: 162. Wait queue: 35.
+2025-02-12 12:28:29.429 UTC [35] CONTEXT:  while updating tuple (0,18) in relation "accounts"
+2025-02-12 12:28:29.429 UTC [35] STATEMENT:  UPDATE accounts SET amount = amount + 100.00 WHERE acc_no = 2;
+
+2025-02-12 12:28:37.472 UTC [162] LOG:  process 162 still waiting for ShareLock on transaction 773 after 1000.370 ms
+2025-02-12 12:28:37.472 UTC [162] DETAIL:  Process holding the lock: 164. Wait queue: 162.
+2025-02-12 12:28:37.472 UTC [162] CONTEXT:  while updating tuple (0,3) in relation "accounts"
+2025-02-12 12:28:37.472 UTC [162] STATEMENT:  UPDATE accounts SET amount = amount + 100.00 WHERE acc_no = 3;
+
+2025-02-12 12:28:44.036 UTC [164] LOG:  process 164 detected deadlock while waiting for ShareLock on transaction 771 after 1000.398 ms
+2025-02-12 12:28:44.036 UTC [164] DETAIL:  Process holding the lock: 35. Wait queue: .
+2025-02-12 12:28:44.036 UTC [164] CONTEXT:  while updating tuple (0,16) in relation "accounts"
+2025-02-12 12:28:44.036 UTC [164] STATEMENT:  UPDATE accounts SET amount = amount + 100.00 WHERE acc_no = 1;
+2025-02-12 12:28:44.036 UTC [164] ERROR:  deadlock detected
+2025-02-12 12:28:44.036 UTC [164] DETAIL:  Process 164 waits for ShareLock on transaction 771; blocked by process 35.
+        Process 35 waits for ShareLock on transaction 772; blocked by process 162.
+        Process 162 waits for ShareLock on transaction 773; blocked by process 164.
+        Process 164: UPDATE accounts SET amount = amount + 100.00 WHERE acc_no = 1;
+        Process 35: UPDATE accounts SET amount = amount + 100.00 WHERE acc_no = 2;
+        Process 162: UPDATE accounts SET amount = amount + 100.00 WHERE acc_no = 3;
+2025-02-12 12:28:44.036 UTC [164] HINT:  See server log for query details.
+2025-02-12 12:28:44.036 UTC [164] CONTEXT:  while updating tuple (0,16) in relation "accounts"
+2025-02-12 12:28:44.036 UTC [164] STATEMENT:  UPDATE accounts SET amount = amount + 100.00 WHERE acc_no = 1;
+
+2025-02-12 12:28:44.036 UTC [162] LOG:  process 162 acquired ShareLock on transaction 773 after 7564.922 ms
+2025-02-12 12:28:44.036 UTC [162] CONTEXT:  while updating tuple (0,3) in relation "accounts"
+2025-02-12 12:28:44.036 UTC [162] STATEMENT:  UPDATE accounts SET amount = amount + 100.00 WHERE acc_no = 3;
+```
+По логам вполне можно разобраться, что deadlock создали три транзакции, но сами блокирующие операции не приводятся. 
+
+В первом блоке помечается, что процесс 35 заблокирован транзакцией 772 и процессом 162. Процесс 162 заблокирован траннзакцией 773 и процессом 164. Процесс 164 заблокирован транцакцией 771 и процессом 35. На этом моменте обнаружен deadlock, поэтому транзакция 773 (процесс 164) фейлится и килляется. При этом в логах выведены только последние операции UPDATE, глядя на них, нельзя понять, почему произошла блокировка. В логах пишется `See server log for query details.`, но мне не удалось найти никаких доп файлов, где писалась бы более подробная информация.
 ### Задание 4
 Могут ли две транзакции, выполняющие единственную команду UPDATE одной и той же таблицы (без where), заблокировать друг друга?
