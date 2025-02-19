@@ -111,7 +111,7 @@ synchronous_commit = off, tps = 3761.747381
 environment:
       - POSTGRES_INITDB_ARGS=--data-checksums
 ```
-```
+```sql
 CREATE TABLE accounts(
   acc_no integer PRIMARY KEY,
   amount numeric
@@ -126,7 +126,7 @@ select * from accounts;
       3 | 3000.00
 (3 строки)
 ```
-```
+```sql
 select * from accounts where acc_no=1;
 -- WARNING:  page verification failed, calculated checksum 19152 but expected 16705
 -- ERROR:  invalid page in block 0 of relation base/13780/16400
