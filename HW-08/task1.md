@@ -111,6 +111,7 @@ synchronous_commit = off, tps = 3761.747381
 environment:
       - POSTGRES_INITDB_ARGS=--data-checksums
 ```
+Создадим таблицу и наполним ее данными
 ```sql
 CREATE TABLE accounts(
   acc_no integer PRIMARY KEY,
@@ -126,11 +127,14 @@ select * from accounts;
       3 | 3000.00
 (3 строки)
 ```
+После изменений в файле таблицы появляется ошибка
 ```sql
 select * from accounts where acc_no=1;
 -- WARNING:  page verification failed, calculated checksum 19152 but expected 16705
 -- ERROR:  invalid page in block 0 of relation base/13780/16400
-
+```
+Для игнорировавния ошибки можно включить ignore_checksum_failure
+```sql
 show ignore_checksum_failure;
 -- ignore_checksum_failure 
 -- -------------------------
@@ -140,10 +144,6 @@ show ignore_checksum_failure;
 alter system set ignore_checksum_failure=on;
 -- ALTER SYSTEM
 select pg_reload_conf();
--- pg_reload_conf 
--- ----------------
--- t
--- (1 строка)
 
 show ignore_checksum_failure;
 -- ignore_checksum_failure 
