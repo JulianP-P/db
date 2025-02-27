@@ -97,3 +97,19 @@ SELECT rating, count(*) AS count
  R      |   195
  G      |   178
 ```
+
+
+
+```
+ explain select * from film where length = 60;
+ Seq Scan on film  (cost=0.00..74.50 rows=8 width=440)
+   Filter: (length = 60)
+```
+create index idx_lenth on film(length);
+
+
+explain select * from film where length = 60;
+ Bitmap Heap Scan on film  (cost=4.34..27.82 rows=8 width=440)
+   Recheck Cond: (length = 60)
+   ->  Bitmap Index Scan on idx_lenth  (cost=0.00..4.33 rows=8 width=0)
+         Index Cond: (length = 60)
