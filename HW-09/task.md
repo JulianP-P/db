@@ -20,7 +20,9 @@ alter column description type TSVECTOR
  USING description::tsvector;
 ```
 Создание индекса
-
+```sql
+create index idx_description on film using gin(description);
+```
 Поиск после создания индекса
 ```sql
  explain SELECT * FROM film
@@ -30,6 +32,7 @@ alter column description type TSVECTOR
    ->  Bitmap Index Scan on idx_description  (cost=0.00..8.04 rows=5 width=0)
          Index Cond: (description @@ '''Dog'''::tsquery)
 ```
+
 Реализовать индекс на часть таблицы или индекс
 на поле с функцией
 Создать индекс на несколько полей
