@@ -1,3 +1,46 @@
+Для выполнения задач использовалась таблица film из данного репозитория
+https://github.com/jOOQ/sakila/tree/main
+### Виды индексов. Работа с индексами и оптимизация запросов 
+#### 1. Реализовать индекс для полнотекстового поиска
+Поиск будем производить по полю description. Будем искать фильмы с собаками. 
+Изначальный тип поля - text.
+
+Пробуем "наивный" способ поиска: 
+```sql
+EXPLAIN SELECT * FROM film
+    WHERE description like '%Dog%' \gx
+QUERY PLAN | Seq Scan on film  (cost=0.00..68.72 rows=41 width=390)
+-----------+-------------------------------------------------------
+QUERY PLAN |   Filter: (description ~~ '%Dog%'::text)
+```
+Изменю изначальный тип поля на TSVECTOR для полнотекстового поиска:
+```sql
+alter table film
+alter column description type TSVECTOR
+ USING description::tsvector;
+```
+Создание индекса
+
+Поиск после создания индекса
+```sql
+ explain SELECT * FROM film
+    WHERE description @@ 'Dog';
+ Bitmap Heap Scan on film  (cost=8.04..23.84 rows=5 width=328)
+   Recheck Cond: (description @@ '''Dog'''::tsquery)
+   ->  Bitmap Index Scan on idx_description  (cost=0.00..8.04 rows=5 width=0)
+         Index Cond: (description @@ '''Dog'''::tsquery)
+```
+Реализовать индекс на часть таблицы или индекс
+на поле с функцией
+Создать индекс на несколько полей
+Написать комментарии к каждому из индексов
+Описать что и как делали и с какими проблемами
+столкнулись
+ 
+ 
+ 
+ 
+ 
  update film set release_year = 2007 where film_id in (1,2,3,4,5,6,7,8,9,10);
 
  SELECT release_year, count(*) AS count
@@ -40,22 +83,12 @@ tablespace |
 indexdef   | CREATE INDEX idx_title ON public.film USING btree (title)
 
 
-EXPLAIN SELECT * FROM film
-    WHERE description like '%Dog%' \gx
-QUERY PLAN | Seq Scan on film  (cost=0.00..68.72 rows=41 width=390)
------------+-------------------------------------------------------
-QUERY PLAN |   Filter: (description ~~ '%Dog%'::text)
 
 
-alter table film alter column description type TSVECTOR USING description::tsvector;
 
 
- explain SELECT * FROM film
-    WHERE description @@ 'Dog';
- Bitmap Heap Scan on film  (cost=8.04..23.84 rows=5 width=328)
-   Recheck Cond: (description @@ '''Dog'''::tsquery)
-   ->  Bitmap Index Scan on idx_description  (cost=0.00..8.04 rows=5 width=0)
-         Index Cond: (description @@ '''Dog'''::tsquery)
+
+
 
 
 
