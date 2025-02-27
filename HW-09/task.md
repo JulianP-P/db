@@ -87,3 +87,13 @@ explain select * from film where rating = 'PG' and length > 90;
 Цена запроса изменилась с cost=0.00..77.00 до cost=5.62..69.58.
 
 Такая маленькая разница скорее всего связана с небольшой кардинальностью.
+```sql
+SELECT rating, count(*) AS count
+    FROM film
+    GROUP BY rating;
+ NC-17  |   210
+ PG-13  |   223
+ PG     |   194
+ R      |   195
+ G      |   178
+```
