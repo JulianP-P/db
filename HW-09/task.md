@@ -26,6 +26,7 @@ explain select * from film where length = 60;
    ->  Bitmap Index Scan on idx_lenth  (cost=0.00..4.33 rows=8 width=0)
          Index Cond: (length = 60)
 ```
+Цена запроса изменилась с cost=0.00..74.50 до cost=4.34..27.82.
 
 #### 2. Реализовать индекс для полнотекстового поиска
 Поиск будем производить по полю description. Будем искать фильмы с собаками. 
