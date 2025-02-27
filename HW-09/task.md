@@ -1,6 +1,26 @@
 Для выполнения задач использовалась таблица film из данного репозитория
 https://github.com/jOOQ/sakila/tree/main
 ### Виды индексов. Работа с индексами и оптимизация запросов 
+#### 1. Создать индекс к какой-либо из таблиц вашей БД. Прислать текстом результат команды explain, в которой используется данный индекс
+Поиск фильмов с продолжительностью 60 минут.
+```sql
+ explain select * from film where length = 60;
+ Seq Scan on film  (cost=0.00..74.50 rows=8 width=440)
+   Filter: (length = 60)
+```
+Создание индекса
+```sql
+create index idx_lenth on film(length);
+```
+Поиск фильмов после создание индекса.
+```sql
+explain select * from film where length = 60;
+ Bitmap Heap Scan on film  (cost=4.34..27.82 rows=8 width=440)
+   Recheck Cond: (length = 60)
+   ->  Bitmap Index Scan on idx_lenth  (cost=0.00..4.33 rows=8 width=0)
+         Index Cond: (length = 60)
+```
+
 #### 1. Реализовать индекс для полнотекстового поиска
 Поиск будем производить по полю description. Будем искать фильмы с собаками. 
 Изначальный тип поля - text.
@@ -100,16 +120,3 @@ SELECT rating, count(*) AS count
 
 
 
-```
- explain select * from film where length = 60;
- Seq Scan on film  (cost=0.00..74.50 rows=8 width=440)
-   Filter: (length = 60)
-```
-create index idx_lenth on film(length);
-
-
-explain select * from film where length = 60;
- Bitmap Heap Scan on film  (cost=4.34..27.82 rows=8 width=440)
-   Recheck Cond: (length = 60)
-   ->  Bitmap Index Scan on idx_lenth  (cost=0.00..4.33 rows=8 width=0)
-         Index Cond: (length = 60)
