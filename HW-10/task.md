@@ -19,10 +19,10 @@
 (11 строк)
 ```
 Наибольший размер имеют таблицы:
-ticket_flights (68 Mb)
-tickets (48 Mb)
-boarding_passes (33 Mb)
-bookings (13 Mb)
+1. ticket_flights (68 Mb)
+2. tickets (48 Mb)
+3. boarding_passes (33 Mb)
+4. bookings (13 Mb)
 
 Анализ структуры данных:
 Ознакомьтесь с таблицами базы данных, особенно с таблицами bookings, tickets, ticket_flights, flights, boarding_passes, seats, airports, aircrafts.
