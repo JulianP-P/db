@@ -93,6 +93,70 @@ WHERE parent.relname='ticket_flights_cp';
 ```
 insert into ticket_flights_cp select * from ticket_flights;
 ```
+поиск случайного номера билета
+```sql
+demo=# explain analyze
+select * from ticket_flights where ticket_no='0005432169756';
+                                                              QUERY PLAN                                                              
+--------------------------------------------------------------------------------------------------------------------------------------
+ Index Scan using ticket_flights_pkey on ticket_flights  (cost=0.42..16.47 rows=3 width=32) (actual time=0.099..0.100 rows=0 loops=1)
+   Index Cond: (ticket_no = '0005432169756'::bpchar)
+ Planning Time: 0.202 ms
+ Execution Time: 0.129 ms
+(4 rows)
+
+demo=# explain analyze
+select * from ticket_flights_cp where ticket_no='0005432169756';
+                                                              QUERY PLAN                                                              
+--------------------------------------------------------------------------------------------------------------------------------------
+ Bitmap Heap Scan on ticket_flights_0 ticket_flights_cp  (cost=4.44..15.95 rows=3 width=32) (actual time=0.049..0.051 rows=0 loops=1)
+   Recheck Cond: (ticket_no = '0005432169756'::bpchar)
+   ->  Bitmap Index Scan on ticket_flights_0_pkey  (cost=0.00..4.44 rows=3 width=0) (actual time=0.043..0.044 rows=0 loops=1)
+         Index Cond: (ticket_no = '0005432169756'::bpchar)
+ Planning Time: 0.356 ms
+ Execution Time: 0.086 ms
+(6 rows)
+```
+
+```
+demo=# select * from ticket_flights_cp where ticket_no='0005432211371';
+   ticket_no   | flight_id | fare_conditions |  amount  
+---------------+-----------+-----------------+----------
+ 0005432211371 |     30625 | Economy         | 14000.00
+(1 row)
+
+demo=# UPDATE  * from ticket_flights_cp where ticket_no='0005432211371';
+aircrafts            bookings.            pg_catalog.          ticket_flights       ticket_flights_3     ticket_flights_7     tickets              
+airports             flights              pg_toast.            ticket_flights_0     ticket_flights_4     ticket_flights_8     
+boarding_passes      flights_v            public.              ticket_flights_1     ticket_flights_5     ticket_flights_9     
+bookings             information_schema.  seats                ticket_flights_2     ticket_flights_6     ticket_flights_cp    
+demo=# UPDATE ticket_flights_cp SET  * from ticket_flights_cp where ticket_no='0005432211371';
+amount           fare_conditions  flight_id        ticket_no        
+demo=# UPDATE ticket_flights_cp SET amount =  * from ticket_flights_cp where ticket_no='0005432211371';
+
+demo=# UPDATE ticket_flights_cp SET amount = 599 * from ticket_flights_cp where ticket_no='0005432211371';
+
+demo=# UPDATE ticket_flights_cp SET amount = 599 where ticket_no='0005432211371';
+UPDATE 1
+demo=# select * from ticket_flights_cp where ticket_no='0005432211371';
+   ticket_no   | flight_id | fare_conditions | amount 
+---------------+-----------+-----------------+--------
+ 0005432211371 |     30625 | Economy         | 599.00
+(1 row)
+
+demo=# DELETE FROM ticket_flights_cp SET amount = 599 where ticket_no='0005432211371';
+FROM
+demo=# DELETE FROM ticket_flights_cp  where ticket_no='0005432211371';
+USING  WHERE  
+demo=# DELETE FROM ticket_flights_cp  where ticket_no='0005432211371';
+DELETE 1
+demo=# select * from ticket_flights_cp where ticket_no='0005432211371';
+ ticket_no | flight_id | fare_conditions | amount 
+-----------+-----------+-----------------+--------
+(0 rows)
+
+demo=# 
+```
 
 Всё это обычно полезно только для очень больших таблиц. Какие именно таблицы выиграют от секционирования, зависит от конкретного приложения, хотя, как правило, это следует применять для таблиц, размер которых превышает объём ОЗУ сервера.
 
