@@ -40,9 +40,56 @@ select count(distinct flight_id) as count from boarding_passes;
 Для работы будет взята таблица ticket_flights
 
 
+```
+create table ticket_flights_cp (like ticket_flights including all) partition by hash ( ticket_no);
 
+create table ticket_flights_0 partition of ticket_flights_cp for values with (modulus 10, remainder 0);CREATE TABLE
+demo=# create table ticket_flights_1 partition of ticket_flights_cp for values with (modulus 10, remainder 1);
+CREATE TABLE
+demo=# create table ticket_flights_2 partition of ticket_flights_cp for values with (modulus 10, remainder 2);
+CREATE TABLE
+demo=# create table ticket_flights_3 partition of ticket_flights_cp for values with (modulus 10, remainder 3);
+CREATE TABLE
+demo=# create table ticket_flights_4 partition of ticket_flights_cp for values with (modulus 10, remainder 4);
+CREATE TABLE
+demo=# create table ticket_flights_5 partition of ticket_flights_cp for values with (modulus 10, remainder 5);
+CREATE TABLE
+demo=# create table ticket_flights_6 partition of ticket_flights_cp for values with (modulus 10, remainder 6);
+CREATE TABLE
+demo=# create table ticket_flights_7 partition of ticket_flights_cp for values with (modulus 10, remainder 7);
+CREATE TABLE
+demo=# create table ticket_flights_8 partition of ticket_flights_cp for values with (modulus 10, remainder 8);
+CREATE TABLE
+demo=# create table ticket_flights_9 partition of ticket_flights_cp for values with (modulus 10, remainder 9);
+```
 
+```
+SELECT
+    nmsp_parent.nspname AS parent_schema,
+    parent.relname      AS parent,
+    nmsp_child.nspname  AS child_schema,
+    child.relname       AS child
+FROM pg_inherits
+    JOIN pg_class parent            ON pg_inherits.inhparent = parent.oid
+    JOIN pg_class child             ON pg_inherits.inhrelid   = child.oid
+    JOIN pg_namespace nmsp_parent   ON nmsp_parent.oid  = parent.relnamespace
+    JOIN pg_namespace nmsp_child    ON nmsp_child.oid   = child.relnamespace
+WHERE parent.relname='ticket_flights_cp';
+ parent_schema |      parent       | child_schema |      child       
+---------------+-------------------+--------------+------------------
+ bookings      | ticket_flights_cp | bookings     | ticket_flights_0
+ bookings      | ticket_flights_cp | bookings     | ticket_flights_1
+ bookings      | ticket_flights_cp | bookings     | ticket_flights_2
+ bookings      | ticket_flights_cp | bookings     | ticket_flights_3
+ bookings      | ticket_flights_cp | bookings     | ticket_flights_4
+ bookings      | ticket_flights_cp | bookings     | ticket_flights_5
+ bookings      | ticket_flights_cp | bookings     | ticket_flights_6
+ bookings      | ticket_flights_cp | bookings     | ticket_flights_7
+ bookings      | ticket_flights_cp | bookings     | ticket_flights_8
+ bookings      | ticket_flights_cp | bookings     | ticket_flights_9
+(10 rows)
 
+```
 
 Всё это обычно полезно только для очень больших таблиц. Какие именно таблицы выиграют от секционирования, зависит от конкретного приложения, хотя, как правило, это следует применять для таблиц, размер которых превышает объём ОЗУ сервера.
 
