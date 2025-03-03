@@ -158,6 +158,205 @@ demo=# select * from ticket_flights_cp where ticket_no='0005432211371';
 demo=# 
 ```
 
+___
+```
+demo=# select min(book_date) from bookings limit 10;
+          min           
+------------------------
+ 2016-08-19 10:05:00+00
+(1 строка)
+
+demo=# select max(book_date) from bookings limit 10;
+          max           
+------------------------
+ 2016-10-13 14:00:00+00
+(1 строка)
+
+```
+
+```
+demo=# create table bookings_cp (like bookings including all) partition by range (book_date);
+ERROR:  unique constraint on partitioned table must include all partitioning columns
+ПОДРОБНОСТИ:  PRIMARY KEY constraint on table "bookings_cp" lacks column "book_date" which is part of the partition key.
+demo=# create table bookings_cp (like bookings) partition by range (book_date);CREATE TABLE
+```
+```
+demo=# create table bookings_2016_08 partition of bookings_cp for values from ('2016-08-01') to ('2016-09-01');
+CREATE TABLE
+demo=# create table bookings_2016_09 partition of bookings_cp for values from ('2016-09-01') to ('2016-10-01');
+CREATE TABLE
+demo=# create table bookings_2016_10 partition of bookings_cp for values from ('2016-10-01') to ('2016-11-01');
+CREATE TABLE
+```
+
+```
+insert INTO bookings_cp select * from bookings
+bookings          bookings_2016_08  bookings_2016_10  
+bookings.         bookings_2016_09  bookings_cp       
+demo=# insert INTO bookings_cp select * from bookings;
+INSERT 0 262788
+demo=# select * from bo
+boarding_passes   bookings.         bookings_2016_09  bookings_cp
+bookings          bookings_2016_08  bookings_2016_10  
+demo=# select * from bookings_2016_08 limit 10;
+ book_ref |       book_date        | total_amount 
+----------+------------------------+--------------
+ 000511   | 2016-08-28 23:40:00+00 |     26700.00
+ 0005E7   | 2016-08-31 05:25:00+00 |     28800.00
+ 000A39   | 2016-08-28 23:29:00+00 |     23400.00
+ 000B77   | 2016-08-28 22:39:00+00 |     68800.00
+ 000D3C   | 2016-08-30 14:23:00+00 |    173500.00
+ 001436   | 2016-08-29 10:10:00+00 |    101200.00
+ 001A6E   | 2016-08-31 14:06:00+00 |     21200.00
+ 001A9F   | 2016-08-29 07:29:00+00 |     55800.00
+ 001ED4   | 2016-08-29 06:52:00+00 |     56000.00
+ 00216F   | 2016-08-29 12:24:00+00 |     47200.00
+(10 строк)
+
+demo=# select * from bookings_2016_09 limit 10;
+ book_ref |       book_date        | total_amount 
+----------+------------------------+--------------
+ 00000F   | 2016-09-01 23:12:00+00 |    265700.00
+ 000012   | 2016-09-11 05:02:00+00 |     37900.00
+ 0002DB   | 2016-09-26 02:30:00+00 |    101500.00
+ 0002E0   | 2016-09-08 12:09:00+00 |     89600.00
+ 0002F3   | 2016-09-07 01:31:00+00 |     69600.00
+ 000352   | 2016-09-02 22:02:00+00 |    109500.00
+ 00044D   | 2016-09-26 20:24:00+00 |      6000.00
+ 00044E   | 2016-09-14 01:39:00+00 |    140100.00
+ 0004B0   | 2016-09-25 05:00:00+00 |     12000.00
+ 0004E1   | 2016-09-28 13:34:00+00 |    139300.00
+(10 строк)
+
+demo=# select * from bookings_2016_10 limit 10;
+ book_ref |       book_date        | total_amount 
+----------+------------------------+--------------
+ 000068   | 2016-10-13 10:27:00+00 |     18100.00
+ 000181   | 2016-10-08 09:28:00+00 |    131800.00
+ 0002D8   | 2016-10-05 17:40:00+00 |     23600.00
+ 00034E   | 2016-10-02 12:52:00+00 |     73300.00
+ 000374   | 2016-10-10 06:13:00+00 |    136200.00
+ 00053F   | 2016-10-03 23:15:00+00 |      6000.00
+ 0005F4   | 2016-10-06 22:14:00+00 |     95400.00
+ 0006F5   | 2016-10-02 18:10:00+00 |     80200.00
+ 000836   | 2016-10-10 19:28:00+00 |     23400.00
+ 000862   | 2016-10-05 10:23:00+00 |     45500.00
+```
+
+```
+demo=# explain analyze                                                                        
+select count(*) from bookings_cp where book_date between '2016-09-25' and '2016-10-05';
+                                                                                 QUERY PLAN                                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize Aggregate  (cost=4852.13..4852.14 rows=1 width=8) (actual time=10.470..12.610 rows=1 loops=1)
+   ->  Gather  (cost=4851.91..4852.12 rows=2 width=8) (actual time=10.377..12.601 rows=3 loops=1)
+         Workers Planned: 2
+         Workers Launched: 2
+         ->  Partial Aggregate  (cost=3851.91..3851.92 rows=1 width=8) (actual time=7.012..7.012 rows=1 loops=3)
+               ->  Parallel Append  (cost=0.00..3794.31 rows=23040 width=0) (actual time=0.010..6.342 rows=18591 loops=3)
+                     ->  Parallel Seq Scan on bookings_2016_09 bookings_cp_1  (cost=0.00..2518.14 rows=19362 width=0) (actual time=0.003..3.151 rows=11052 loops=3)
+                           Filter: ((book_date >= '2016-09-25 00:00:00+00'::timestamp with time zone) AND (book_date <= '2016-10-05 00:00:00+00'::timestamp with time zone))
+                           Rows Removed by Filter: 44184
+                     ->  Parallel Seq Scan on bookings_2016_10 bookings_cp_2  (cost=0.00..1160.98 rows=13165 width=0) (actual time=0.012..3.229 rows=11308 loops=2)
+                           Filter: ((book_date >= '2016-09-25 00:00:00+00'::timestamp with time zone) AND (book_date <= '2016-10-05 00:00:00+00'::timestamp with time zone))
+                           Rows Removed by Filter: 26884
+ Planning Time: 0.325 ms
+ Execution Time: 12.670 ms
+(14 rows)
+demo=# explain analyze
+select count(*) from bookings where book_date between '2016-09-25' and '2016-10-05';
+                                                                              QUERY PLAN                                                                               
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Finalize Aggregate  (cost=5073.84..5073.85 rows=1 width=8) (actual time=12.076..14.646 rows=1 loops=1)
+   ->  Gather  (cost=5073.73..5073.84 rows=1 width=8) (actual time=11.990..14.639 rows=2 loops=1)
+         Workers Planned: 1
+         Workers Launched: 1
+         ->  Partial Aggregate  (cost=4073.73..4073.74 rows=1 width=8) (actual time=9.751..9.751 rows=1 loops=2)
+               ->  Parallel Seq Scan on bookings  (cost=0.00..3992.72 rows=32405 width=0) (actual time=0.010..8.760 rows=27887 loops=2)
+                     Filter: ((book_date >= '2016-09-25 00:00:00+00'::timestamp with time zone) AND (book_date <= '2016-10-05 00:00:00+00'::timestamp with time zone))
+                     Rows Removed by Filter: 103507
+ Planning Time: 0.562 ms
+ Execution Time: 14.708 ms
+(10 rows)
+```
+ПОсле создания индекса
+```
+                                                                                        QUERY PLAN                                                                                        
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=1881.91..1881.92 rows=1 width=8) (actual time=7.277..7.278 rows=1 loops=1)
+   ->  Append  (cost=0.29..1743.61 rows=55321 width=0) (actual time=0.010..5.728 rows=55774 loops=1)
+         ->  Index Only Scan using bookings_2016_09_book_date_idx on bookings_2016_09 bookings_cp_1  (cost=0.29..874.93 rows=32932 width=0) (actual time=0.009..1.961 rows=33157 loops=1)
+               Index Cond: ((book_date >= '2016-09-25 00:00:00+00'::timestamp with time zone) AND (book_date <= '2016-10-05 00:00:00+00'::timestamp with time zone))
+               Heap Fetches: 0
+         ->  Index Only Scan using bookings_2016_10_book_date_idx on bookings_2016_10 bookings_cp_2  (cost=0.29..592.07 rows=22389 width=0) (actual time=0.006..1.309 rows=22617 loops=1)
+               Index Cond: ((book_date >= '2016-09-25 00:00:00+00'::timestamp with time zone) AND (book_date <= '2016-10-05 00:00:00+00'::timestamp with time zone))
+               Heap Fetches: 0
+ Planning Time: 0.401 ms
+ Execution Time: 7.308 ms
+(10 rows)
+```
+```
+demo=# create index book_date_old ON bookings (book_date);
+CREATE INDEX
+demo=# explain analyze
+select count(*) from bookings where book_date between '2016-09-25' and '2016-10-05';
+                                                                          QUERY PLAN                                                                           
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=1599.92..1599.93 rows=1 width=8) (actual time=4.877..4.878 rows=1 loops=1)
+   ->  Index Only Scan using book_date_old on bookings  (cost=0.42..1462.20 rows=55089 width=0) (actual time=0.131..3.233 rows=55774 loops=1)
+         Index Cond: ((book_date >= '2016-09-25 00:00:00+00'::timestamp with time zone) AND (book_date <= '2016-10-05 00:00:00+00'::timestamp with time zone))
+         Heap Fetches: 0
+ Planning Time: 0.381 ms
+ Execution Time: 4.920 ms
+(6 rows)
+```
+
+```
+demo=# select * from bookings_cp where book_ref = '000068';
+ book_ref |       book_date        | total_amount 
+----------+------------------------+--------------
+ 000068   | 2016-10-13 10:27:00+00 |     18100.00
+(1 строка)
+
+demo=# update 
+aircrafts            flights              ticket_flights_3
+airports             flights_v            ticket_flights_4
+boarding_passes      information_schema.  ticket_flights_5
+bookings             public.              ticket_flights_6
+bookings.            seats                ticket_flights_7
+bookings_2016_08     ticket_flights       ticket_flights_8
+bookings_2016_09     ticket_flights_0     ticket_flights_9
+bookings_2016_10     ticket_flights_1     ticket_flights_cp
+bookings_cp          ticket_flights_2     tickets
+demo=# update bookings_cp SET total_amount = 19100.0
+
+demo=# update bookings_cp SET total_amount = '19100.0'
+
+demo=# update bookings_cp SET total_amount = '19100.0' 
+
+demo=# update bookings_cp SET total_amount = '19100.0' where book_ref = '000068';
+UPDATE 1
+demo=# select * from bookings_cp where book_ref = '000068';
+ book_ref |       book_date        | total_amount 
+----------+------------------------+--------------
+ 000068   | 2016-10-13 10:27:00+00 |     19100.00
+(1 строка)
+
+demo=# delete bookings_cp  where book_ref = '000068';
+ERROR:  syntax error at or near "bookings_cp"
+СТРОКА 1: delete bookings_cp  where book_ref = '000068';
+                 ^
+demo=# delete from bookings_cp  where book_ref = '000068';
+DELETE 1
+demo=# select * from bookings_cp where book_ref = '000068';
+ book_ref | book_date | total_amount 
+----------+-----------+--------------
+(0 строк)
+
+demo=# 
+```
+
+
 Всё это обычно полезно только для очень больших таблиц. Какие именно таблицы выиграют от секционирования, зависит от конкретного приложения, хотя, как правило, это следует применять для таблиц, размер которых превышает объём ОЗУ сервера.
 
 
